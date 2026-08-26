@@ -23,6 +23,7 @@ import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminRegistrations from '@/pages/admin/AdminRegistrations';
 import AdminPayments from '@/pages/admin/AdminPayments';
+import AdminContent from '@/pages/admin/AdminContent';
 
 function MainLayout() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="registrations" element={<AdminRegistrations />} />
         <Route path="payments" element={<AdminPayments />} />
+        <Route path="content" element={<AdminContent />} />
       </Route>
     </Routes>
   );

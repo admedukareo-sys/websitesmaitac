@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Clock, ShieldCheck, GraduationCap } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -16,8 +16,12 @@ export default function Footer() {
           {/* Col 1: Identity & Vision */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500 text-amber-950 flex items-center justify-center font-bold shadow">
-                <GraduationCap size={24} />
+              <div className="bg-white p-1 rounded-2xl shadow">
+                <img 
+                  src="/logo.png" 
+                  alt="Logo Official SMA IT Andalas Cendekia" 
+                  className="h-12 w-auto object-contain"
+                />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white leading-tight">SMA IT</h3>

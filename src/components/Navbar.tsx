@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import TopBar from './TopBar';
 
@@ -24,15 +24,19 @@ export default function Navbar() {
       {/* Main Glassmorphism Navbar */}
       <div className="bg-emerald-900/95 backdrop-blur-md text-white border-b border-emerald-800/80">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-3.5">
-            {/* Logo Brand */}
+          <div className="flex items-center justify-between py-2.5">
+            {/* Official Logo Brand */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-500 text-amber-950 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                <GraduationCap className="h-6 w-6" />
+              <div className="bg-white p-1 rounded-xl shadow-md group-hover:scale-105 transition-transform">
+                <img 
+                  src="/logo.png" 
+                  alt="Logo SMA IT Andalas Cendekia" 
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
               </div>
               <div>
-                <h1 className="font-extrabold text-lg sm:text-xl leading-none tracking-tight">SMA IT</h1>
-                <p className="text-[11px] text-emerald-200 font-medium">Andalas Cendekia</p>
+                <h1 className="font-extrabold text-lg sm:text-xl leading-none tracking-tight text-white">SMA IT</h1>
+                <p className="text-[11px] text-amber-300 font-bold">Andalas Cendekia</p>
               </div>
             </Link>
             

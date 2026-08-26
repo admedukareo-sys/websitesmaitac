@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { LayoutDashboard, Users, CreditCard, LogOut, ArrowLeft, ShieldCheck, User } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, LogOut, ArrowLeft, User, FileEdit } from 'lucide-react';
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
@@ -35,14 +35,18 @@ export default function AdminLayout() {
       <aside className="w-64 bg-emerald-950 text-emerald-100 flex-shrink-0 flex flex-col justify-between border-r border-emerald-900 shadow-xl">
         <div>
           {/* Brand Header */}
-          <div className="p-6 border-b border-emerald-900/80 bg-emerald-900/40">
-            <div className="flex items-center gap-2.5 mb-1">
-              <div className="w-8 h-8 rounded-xl bg-amber-500 text-amber-950 flex items-center justify-center font-bold shadow">
-                <ShieldCheck size={20} />
+          <div className="p-5 border-b border-emerald-900/80 bg-emerald-900/40">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="bg-white p-1 rounded-xl shadow">
+                <img 
+                  src="/logo.png" 
+                  alt="Logo Official SMA IT Andalas Cendekia" 
+                  className="h-8 w-auto object-contain"
+                />
               </div>
-              <h2 className="text-lg font-extrabold text-white">Panel Admin</h2>
+              <h2 className="text-base font-extrabold text-white">Panel Admin</h2>
             </div>
-            <p className="text-xs text-amber-300 font-medium">SMA IT Andalas Cendekia</p>
+            <p className="text-[11px] text-amber-300 font-bold">SMA IT Andalas Cendekia</p>
           </div>
 
           {/* Navigation Links */}
@@ -50,7 +54,7 @@ export default function AdminLayout() {
             <Link 
               to="/admin" 
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive('/admin') 
+                isActive('/admin') && location.pathname === '/admin'
                   ? 'bg-amber-500 text-amber-950 font-bold shadow-md shadow-amber-500/20' 
                   : 'hover:bg-emerald-900/80 text-emerald-200 hover:text-white'
               }`}
@@ -81,6 +85,18 @@ export default function AdminLayout() {
             >
               <CreditCard size={18} />
               <span>Verifikasi Pembayaran</span>
+            </Link>
+
+            <Link 
+              to="/admin/content" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActive('/admin/content') 
+                  ? 'bg-amber-500 text-amber-950 font-bold shadow-md shadow-amber-500/20' 
+                  : 'hover:bg-emerald-900/80 text-emerald-200 hover:text-white'
+              }`}
+            >
+              <FileEdit size={18} />
+              <span>Kelola Isi Website</span>
             </Link>
           </nav>
         </div>
@@ -113,7 +129,7 @@ export default function AdminLayout() {
             <span>Portal Admin</span>
             <span>/</span>
             <span className="font-bold text-slate-800">
-              {location.pathname === '/admin' ? 'Dashboard' : location.pathname.includes('registrations') ? 'Data Pendaftar' : 'Verifikasi Pembayaran'}
+              {location.pathname === '/admin' ? 'Dashboard' : location.pathname.includes('registrations') ? 'Data Pendaftar' : location.pathname.includes('payments') ? 'Verifikasi Pembayaran' : 'Kelola Isi Website'}
             </span>
           </div>
 

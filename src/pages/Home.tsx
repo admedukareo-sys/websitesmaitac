@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeroSlider from '@/components/HeroSlider';
 import CoreValues from '@/components/CoreValues';
 import FacilitiesShowcase from '@/components/FacilitiesShowcase';
@@ -8,10 +8,18 @@ import WhyChooseUs from '@/components/WhyChooseUs';
 import Testimonials from '@/components/Testimonials';
 import VideoModal from '@/components/VideoModal';
 import { Play } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { getSiteSettings } from '@/lib/storage';
 
 export default function Home() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string>('https://www.youtube.com/embed/9E09XrFAi_s?autoplay=1');
+
+  useEffect(() => {
+    const s = getSiteSettings();
+    if (s && s.videoUrl) {
+      setVideoUrl(s.videoUrl);
+    }
+  }, []);
 
   return (
     <div>
@@ -56,11 +64,12 @@ export default function Home() {
       {/* 7. Testimoni Orang Tua & Alumni */}
       <Testimonials />
 
-      {/* Video Modal Popup */}
+      {/* Video Modal Popup dengan URL dinamis */}
       <VideoModal 
         isOpen={isVideoModalOpen} 
         onClose={() => setIsVideoModalOpen(false)} 
         videoTitle="Video Profil SMA IT Andalas Cendekia"
+        videoUrl={videoUrl}
       />
     </div>
   );

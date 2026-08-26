@@ -1,68 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, User, ArrowRight, X, MessageSquare } from 'lucide-react';
-
-interface NewsItem {
-  id: number;
-  title: string;
-  category: 'Berita Terkini' | 'Kegiatan Sekolah' | 'Prestasi' | 'Galeri';
-  date: string;
-  author: string;
-  commentsCount: number;
-  imageUrl: string;
-  excerpt: string;
-  content: string;
-}
-
-const newsData: NewsItem[] = [
-  {
-    id: 1,
-    title: 'Siswa SMA IT Andalas Cendekia Raih Juara 1 Olimpiade Sains & IT Nasional 2026',
-    category: 'Prestasi',
-    date: '23/04/2026',
-    author: 'Tim Humas',
-    commentsCount: 12,
-    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-    excerpt: 'Delegasi SMA IT Andalas Cendekia kembali menorehkan prestasi gemilang dengan menjuarai kompetisi karya ilmiah dan aplikasi IT tingkat nasional.',
-    content: 'Pada ajang Olimpiade Sains dan IT tingkat nasional yang diselenggarakan di Jakarta, tim siswa SMA IT Andalas Cendekia berhasil meraih Medali Emas Juara 1 dalam kategori Inovasi Aplikasi Edukasi Islami Berbasis AI. Kepala Sekolah memberikan apresiasi setinggi-tingginya atas perjuangan para siswa dan guru pendamping.',
-  },
-  {
-    id: 2,
-    title: 'Muria & Halal Bihalal Ramadhan: Santunan Anak Yatim dan Tahfidz Qur\'an',
-    category: 'Kegiatan Sekolah',
-    date: '15/04/2026',
-    author: 'Panitia Rohis',
-    commentsCount: 8,
-    imageUrl: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=800&q=80',
-    excerpt: 'Seluruh keluarga besar sekolah merayakan penutupan bulan suci dengan pembagian sembako, santunan, dan khataman Al-Qur\'an 30 Juz.',
-    content: 'Kegiatan rutin tahunan dalam rangka mengasah kepedulian sosial peserta didik dan mempererat tali silaturahmi antar warga sekolah, orang tua, dan masyarakat sekitar.',
-  },
-  {
-    id: 3,
-    title: 'Pembelajaran Outdoor & Study Visit ke Pusat Riset & Laboratorium Teknologi',
-    category: 'Berita Terkini',
-    date: '02/03/2026',
-    author: 'Kurikulum',
-    commentsCount: 5,
-    imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80',
-    excerpt: 'Siswa kelas XI mengikuti kunjungan industri dan riset sains untuk mengenal lebih dalam penerapan ilmu fisika dan komputasi di dunia nyata.',
-    content: 'Dalam rangka mengaplikasikan konsep Project Based Learning (PBL), siswa diajak menyaksikan langsung proses pengolahan data sains, pengembangan perangkat lunak, dan simulasi robotika industri.',
-  },
-  {
-    id: 4,
-    title: 'Dokumentasi Galeri: Pentas Seni & Seni Islam Nasyid Festival 2026',
-    category: 'Galeri',
-    date: '20/02/2026',
-    author: 'Tim Kreatif',
-    commentsCount: 15,
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80',
-    excerpt: 'Suasana kemeriahan dan kekompakan siswa dalam menampilkan bakat nasyid, pidato 3 bahasa, dan seni seni kaligrafi.',
-    content: 'Pentas karya seni Islam merupakan wadah ekspresi bakat dan kreativitas siswa dalam mengagungkan kebesaran syiar Islam melalui alunan nasyid dan keindahan seni kaligrafi.',
-  },
-];
+import { getSiteNews, NewsItem } from '@/lib/storage';
 
 export default function NewsGrid() {
+  const [newsData, setNewsData] = useState<NewsItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('Semua');
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
+
+  useEffect(() => {
+    setNewsData(getSiteNews());
+  }, []);
 
   const categories = ['Semua', 'Berita Terkini', 'Kegiatan Sekolah', 'Prestasi', 'Galeri'];
 

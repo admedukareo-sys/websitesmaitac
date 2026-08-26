@@ -35,10 +35,63 @@ export interface Registration {
   updatedAt: string;
 }
 
+export interface SiteSettings {
+  schoolName: string;
+  tagline: string;
+  visi: string;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+  npsn: string;
+  accreditation: string;
+  videoUrl: string;
+}
+
+export interface NewsItem {
+  id: number;
+  title: string;
+  category: 'Berita Terkini' | 'Kegiatan Sekolah' | 'Prestasi' | 'Galeri';
+  date: string;
+  author: string;
+  commentsCount: number;
+  imageUrl: string;
+  excerpt: string;
+  content: string;
+}
+
+export interface EventItem {
+  id: number;
+  day: string;
+  month: string;
+  title: string;
+  time: string;
+  location: string;
+  category: string;
+  description: string;
+  organizer: string;
+}
+
+export interface SlideItem {
+  id: number;
+  badge: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  primaryCtaText: string;
+  primaryCtaLink: string;
+  secondaryCtaText: string;
+  secondaryCtaLink: string;
+}
+
 const STORAGE_KEYS = {
   USERS: 'smait_users',
   REGISTRATIONS: 'smait_registrations',
   CURRENT_USER: 'smait_current_user',
+  SITE_SETTINGS: 'smait_site_settings',
+  SITE_NEWS: 'smait_site_news',
+  SITE_EVENTS: 'smait_site_events',
+  SITE_SLIDES: 'smait_site_slides',
 };
 
 // Seed initial data if empty
@@ -111,6 +164,117 @@ function initializeStorage() {
       },
     ];
     localStorage.setItem(STORAGE_KEYS.REGISTRATIONS, JSON.stringify(initialRegistrations));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_SETTINGS)) {
+    const defaultSettings: SiteSettings = {
+      schoolName: 'SMA IT Andalas Cendekia',
+      tagline: 'Sekolah Generasi Pemimpin Qur’ani',
+      visi: 'Mewujudkan Siswa Generasi Pemimpin Qur’ani',
+      address: 'Jorong Ranah Lintas, Nagari Tebing Tinggi, Kec. Pulau Punjung, Kab. Dharmasraya, Prov. Sumatera Barat',
+      phone: '0812-6655-8123',
+      email: 'smaitandalascendekia@gmail.com',
+      website: 'https://smait.andalascendekia.sch.id/',
+      npsn: '20104766',
+      accreditation: 'Akreditasi A',
+      videoUrl: 'https://www.youtube.com/embed/9E09XrFAi_s?autoplay=1',
+    };
+    localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(defaultSettings));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_NEWS)) {
+    const defaultNews: NewsItem[] = [
+      {
+        id: 1,
+        title: 'Siswa SMA IT Andalas Cendekia Raih Juara 1 Olimpiade Sains & IT Nasional 2026',
+        category: 'Prestasi',
+        date: '23/04/2026',
+        author: 'Tim Humas',
+        commentsCount: 12,
+        imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
+        excerpt: 'Delegasi SMA IT Andalas Cendekia kembali menorehkan prestasi gemilang dengan menjuarai kompetisi karya ilmiah dan aplikasi IT tingkat nasional.',
+        content: 'Pada ajang Olimpiade Sains dan IT tingkat nasional yang diselenggarakan di Jakarta, tim siswa SMA IT Andalas Cendekia berhasil meraih Medali Emas Juara 1 dalam kategori Inovasi Aplikasi Edukasi Islami Berbasis AI. Kepala Sekolah memberikan apresiasi setinggi-tingginya atas perjuangan para siswa dan guru pendamping.',
+      },
+      {
+        id: 2,
+        title: 'Muria & Halal Bihalal Ramadhan: Santunan Anak Yatim dan Tahfidz Qur\'an',
+        category: 'Kegiatan Sekolah',
+        date: '15/04/2026',
+        author: 'Panitia Rohis',
+        commentsCount: 8,
+        imageUrl: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=800&q=80',
+        excerpt: 'Seluruh keluarga besar sekolah merayakan penutupan bulan suci dengan pembagian sembako, santunan, dan khataman Al-Qur\'an 30 Juz.',
+        content: 'Kegiatan rutin tahunan dalam rangka mengasah kepedulian sosial peserta didik dan mempererat tali silaturahmi antar warga sekolah, orang tua, dan masyarakat sekitar.',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_NEWS, JSON.stringify(defaultNews));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_EVENTS)) {
+    const defaultEvents: EventItem[] = [
+      {
+        id: 1,
+        day: '15',
+        month: 'OKT',
+        title: 'Camp Tahfidz Intensif & Sertifikasi Hafalan 2026',
+        time: '08:00 WIB – Selesai',
+        location: 'Masjid & Camp Hall SMA IT',
+        category: 'Keagamaan & Tahfidz',
+        description: 'Kegiatan karantina dan murojaah hafalan intensif bagi seluruh calon wisudawan Tahfidz angkatan 2026/2027.',
+        organizer: 'Panitia Tahfidz & Musyrif',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(defaultEvents));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_SLIDES)) {
+    const defaultSlides: SlideItem[] = [
+      {
+        id: 1,
+        badge: 'Penerimaan Siswa Baru 2026/2027 Telah Dibuka',
+        title: 'Membentuk Generasi Qurani, Cerdas, dan Berprestasi',
+        description: 'SMA IT Andalas Cendekia memadukan kurikulum nasional dan keislaman untuk mencetak pemimpin masa depan yang berakhlak mulia dan berwawasan global.',
+        imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1920&q=80',
+        primaryCtaText: 'Daftar SPMB Sekarang',
+        primaryCtaLink: '/spmb',
+        secondaryCtaText: 'Pelajari Lebih Lanjut',
+        secondaryCtaLink: '/profil',
+      },
+      {
+        id: 2,
+        badge: 'Program Unggulan Tahfidz Al-Qur\'an',
+        title: 'Target Hafalan 5-10 Juz Berlandaskan Adab Islami',
+        description: 'Pendampingan halaqah Al-Qur\'an harian bersama musyrif & musyrifah berpengalaman untuk mencetak alumni penghafal Al-Qur\'an mutqin.',
+        imageUrl: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1920&q=80',
+        primaryCtaText: 'Lihat Kurikulum & Program',
+        primaryCtaLink: '/kurikulum',
+        secondaryCtaText: 'Portal SPMB',
+        secondaryCtaLink: '/spmb',
+      },
+      {
+        id: 3,
+        badge: 'Fasilitas Digital & Smart Classroom',
+        title: 'Integrasi Sains, Teknologi IPTEK, dan Imtaq',
+        description: 'Laboratorium komputer canggih, kelas digital interaktif, dan akses e-learning 24/7 untuk mendukung pembelajaran berbasis abad 21.',
+        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80',
+        primaryCtaText: 'Jelajahi Kesiswaan',
+        primaryCtaLink: '/kesiswaan',
+        secondaryCtaText: 'Hubungi Kami',
+        secondaryCtaLink: '/kontak',
+      },
+      {
+        id: 4,
+        badge: 'Prestasi & Ekstrakurikuler',
+        title: 'Wadah Bakat, Kepemimpinan, dan Karakter Rabbani',
+        description: 'Lebih dari 24 ekstrakurikuler unggulan serta raihan 120+ prestasi tingkat kabupaten, provinsi, hingga nasional.',
+        imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1920&q=80',
+        primaryCtaText: 'Daftar SPMB Sekarang',
+        primaryCtaLink: '/spmb',
+        secondaryCtaText: 'Profil Sekolah',
+        secondaryCtaLink: '/profil',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(defaultSlides));
   }
 }
 
@@ -239,4 +403,45 @@ export function addRegistrationByAdmin(data: {
   regs.push(newReg);
   saveRegistrations(regs);
   return newReg;
+}
+
+// Site Content CMS Helpers
+export function getSiteSettings(): SiteSettings {
+  initializeStorage();
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_SETTINGS) || '{}');
+  if (!data.videoUrl) {
+    data.videoUrl = 'https://www.youtube.com/embed/9E09XrFAi_s?autoplay=1';
+  }
+  return data;
+}
+
+export function saveSiteSettings(settings: SiteSettings) {
+  localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(settings));
+}
+
+export function getSiteNews(): NewsItem[] {
+  initializeStorage();
+  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_NEWS) || '[]');
+}
+
+export function saveSiteNews(news: NewsItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_NEWS, JSON.stringify(news));
+}
+
+export function getSiteEvents(): EventItem[] {
+  initializeStorage();
+  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_EVENTS) || '[]');
+}
+
+export function saveSiteEvents(events: EventItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(events));
+}
+
+export function getSiteSlides(): SlideItem[] {
+  initializeStorage();
+  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_SLIDES) || '[]');
+}
+
+export function saveSiteSlides(slides: SlideItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(slides));
 }

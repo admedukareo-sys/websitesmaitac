@@ -1,87 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight, Play, Pause } from 'lucide-react';
-
-interface Slide {
-  id: number;
-  badge: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  primaryCtaText: string;
-  primaryCtaLink: string;
-  secondaryCtaText: string;
-  secondaryCtaLink: string;
-}
-
-const slides: Slide[] = [
-  {
-    id: 1,
-    badge: 'Penerimaan Siswa Baru 2026/2027 Telah Dibuka',
-    title: 'Membentuk Generasi Qurani, Cerdas, dan Berprestasi',
-    description: 'SMA IT Andalas Cendekia memadukan kurikulum nasional dan keislaman untuk mencetak pemimpin masa depan yang berakhlak mulia dan berwawasan global.',
-    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1920&q=80',
-    primaryCtaText: 'Daftar SPMB Sekarang',
-    primaryCtaLink: '/spmb',
-    secondaryCtaText: 'Pelajari Lebih Lanjut',
-    secondaryCtaLink: '/profil',
-  },
-  {
-    id: 2,
-    badge: 'Program Unggulan Tahfidz Al-Qur\'an',
-    title: 'Target Hafalan 5-10 Juz Berlandaskan Adab Islami',
-    description: 'Pendampingan halaqah Al-Qur\'an harian bersama musyrif & musyrifah berpengalaman untuk mencetak alumni penghafal Al-Qur\'an mutqin.',
-    imageUrl: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1920&q=80',
-    primaryCtaText: 'Lihat Kurikulum & Program',
-    primaryCtaLink: '/kurikulum',
-    secondaryCtaText: 'Portal SPMB',
-    secondaryCtaLink: '/spmb',
-  },
-  {
-    id: 3,
-    badge: 'Fasilitas Digital & Smart Classroom',
-    title: 'Integrasi Sains, Teknologi IPTEK, dan Imtaq',
-    description: 'Laboratorium komputer canggih, kelas digital interaktif, dan akses e-learning 24/7 untuk mendukung pembelajaran berbasis abad 21.',
-    imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80',
-    primaryCtaText: 'Jelajahi Kesiswaan',
-    primaryCtaLink: '/kesiswaan',
-    secondaryCtaText: 'Hubungi Kami',
-    secondaryCtaLink: '/kontak',
-  },
-  {
-    id: 4,
-    badge: 'Prestasi & Ekstrakurikuler',
-    title: 'Wadah Bakat, Kepemimpinan, dan Karakter Rabbani',
-    description: 'Lebih dari 24 ekstrakurikuler unggulan serta raihan 120+ prestasi tingkat kabupaten, provinsi, hingga nasional.',
-    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1920&q=80',
-    primaryCtaText: 'Daftar SPMB Sekarang',
-    primaryCtaLink: '/spmb',
-    secondaryCtaText: 'Profil Sekolah',
-    secondaryCtaLink: '/profil',
-  },
-];
+import { getSiteSlides, SlideItem } from '@/lib/storage';
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState<SlideItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (isPaused) return;
+    setSlides(getSiteSlides());
+  }, []);
+
+  useEffect(() => {
+    if (isPaused || slides.length === 0) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
     }, 6000);
 
     return () => clearInterval(timer);
-  }, [isPaused]);
+  }, [isPaused, slides]);
 
   const handlePrev = () => {
+    if (slides.length === 0) return;
     setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
   };
 
   const handleNext = () => {
+    if (slides.length === 0) return;
     setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
   };
+
+  if (slides.length === 0) {
+    return <div className="min-h-[500px] bg-emerald-950 flex items-center justify-center text-white">Loading Slide...</div>;
+  }
 
   return (
     <div 
@@ -133,18 +86,22 @@ export default function HeroSlider() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap items-center gap-4">
-                  <Link 
-                    to={slide.primaryCtaLink} 
-                    className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 py-3.5 rounded-full shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2 text-sm sm:text-base"
-                  >
-                    {slide.primaryCtaText} <ArrowRight size={20} />
-                  </Link>
-                  <Link 
-                    to={slide.secondaryCtaLink} 
-                    className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-medium px-8 py-3.5 rounded-full transition-all duration-300 hover:border-white/50 text-sm sm:text-base"
-                  >
-                    {slide.secondaryCtaText}
-                  </Link>
+                  {slide.primaryCtaText && (
+                    <Link 
+                      to={slide.primaryCtaLink || '/spmb'} 
+                      className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 py-3.5 rounded-full shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2 text-sm sm:text-base"
+                    >
+                      {slide.primaryCtaText} <ArrowRight size={20} />
+                    </Link>
+                  )}
+                  {slide.secondaryCtaText && (
+                    <Link 
+                      to={slide.secondaryCtaLink || '/profil'} 
+                      className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-medium px-8 py-3.5 rounded-full transition-all duration-300 hover:border-white/50 text-sm sm:text-base"
+                    >
+                      {slide.secondaryCtaText}
+                    </Link>
+                  )}
                 </div>
               </div>
             );
