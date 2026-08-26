@@ -1,47 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, Quote } from 'lucide-react';
-
-interface Testimonial {
-  id: number;
-  name: string;
-  role: string;
-  rating: number;
-  quote: string;
-  avatarUrl: string;
-  timeAgo: string;
-}
-
-const testimonials: Testimonial[] = [
-  {
-    id: 1,
-    name: 'Dr. H. Hendra Wijaya, M.Si.',
-    role: 'Orang Tua Siswa Kelas XI',
-    rating: 5,
-    quote: 'Alhamdulillah, perkembangan hafalan Al-Qur\'an dan kedisiplinan anak saya meningkat drastis semenjak bersekolah di SMA IT Andalas Cendekia. Guru-gurunya sangat perhatian dan bimbingannya sangat intensif.',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    timeAgo: '1 Minggu yang lalu',
-  },
-  {
-    id: 2,
-    name: 'Siti Rahmawati, S.Kom.',
-    role: 'Alumni SMA IT & Mahasiswi Teknik Informatika UI',
-    rating: 5,
-    quote: 'Bekal ilmu coding, bahasa Inggris, serta hafalan Al-Qur\'an dari sekolah membuat saya sangat percaya diri saat masuk perkuliahan. Lingkungan islami di sekolah membentuk karakter tangguh.',
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-    timeAgo: '1 Bulan yang lalu',
-  },
-  {
-    id: 3,
-    name: 'Ir. Ahmad Zulkarnain',
-    role: 'Orang Tua Alumni (Kedokteran Unand)',
-    rating: 5,
-    quote: 'Perpaduan Kurikulum Merdeka dan program Tahfidz di SMA IT Andalas Cendekia terbukti menghasilkan lulusan yang tidak hanya cerdas akademis namun juga berakhlak mulia.',
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    timeAgo: '3 Bulan yang lalu',
-  },
-];
+import { getSiteTestimonials, TestimonialItem } from '@/lib/storage';
 
 export default function Testimonials() {
+  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
+
+  useEffect(() => {
+    setTestimonials(getSiteTestimonials());
+  }, []);
+
   return (
     <section className="py-20 bg-slate-50 relative overflow-hidden">
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
@@ -67,7 +34,7 @@ export default function Testimonials() {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-1 text-amber-400">
-                    {[...Array(item.rating)].map((_, i) => (
+                    {[...Array(item.rating || 5)].map((_, i) => (
                       <Star key={i} size={16} fill="currentColor" />
                     ))}
                   </div>
@@ -81,9 +48,9 @@ export default function Testimonials() {
 
               <div className="pt-6 border-t border-slate-100 flex items-center gap-4">
                 <img 
-                  src={item.avatarUrl} 
+                  src={item.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'} 
                   alt={item.name} 
-                  className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-sm"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-sm shrink-0"
                 />
                 <div>
                   <h4 className="font-bold text-slate-800 text-sm">{item.name}</h4>

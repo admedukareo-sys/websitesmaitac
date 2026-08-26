@@ -1,62 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ZoomIn } from 'lucide-react';
-
-interface Facility {
-  id: number;
-  title: string;
-  category: 'Akademik' | 'Keagamaan' | 'Teknologi' | 'Olahraga & Terbuka';
-  description: string;
-  imageUrl: string;
-}
-
-const facilitiesData: Facility[] = [
-  {
-    id: 1,
-    title: 'Smart Classroom Interaktif',
-    category: 'Akademik',
-    description: 'Ruang kelas dilengkapi pendingin udara, layar sentuh digital interaktif, dan sound system pendukung.',
-    imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 2,
-    title: 'Laboratorium Komputer & Robotics',
-    category: 'Teknologi',
-    description: 'Perangkat PC spesifikasi tinggi, jaringan internet gigabit, dan kit eksperimen kecerdasan buatan (AI) & IoT.',
-    imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 3,
-    title: 'Masjid & Halaqah Center',
-    category: 'Keagamaan',
-    description: 'Pusat kegiatan ibadah, Shalat Jamaah harian, serta halaqah Tahfidz Al-Qur\'an dengan kapasitas 500+ jamaah.',
-    imageUrl: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 4,
-    title: 'Perpustakaan Digital & Literasi',
-    category: 'Akademik',
-    description: 'Koleksi e-book 10.000+ judul, area membaca yang nyaman, serta ruang diskusi terbuka.',
-    imageUrl: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 5,
-    title: 'Lapangan Olahraga Multi-fungsi',
-    category: 'Olahraga & Terbuka',
-    description: 'Sarana olahraga basket, futsal, voli, dan arena olahraga panahan bertaraf standar nasional.',
-    imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 6,
-    title: 'Taman Pembelajaran Terbuka & Gazebo',
-    category: 'Olahraga & Terbuka',
-    description: 'Lingkungan kampus asri dan hijau yang mendukung kegiatan outdoor study dan istirahat siswa.',
-    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80',
-  },
-];
+import { getSiteFacilities, FacilityItem } from '@/lib/storage';
 
 export default function FacilitiesShowcase() {
+  const [facilitiesData, setFacilitiesData] = useState<FacilityItem[]>([]);
   const [activeTab, setActiveTab] = useState<string>('Semua');
-  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<FacilityItem | null>(null);
+
+  useEffect(() => {
+    setFacilitiesData(getSiteFacilities());
+  }, []);
 
   const categories = ['Semua', 'Akademik', 'Keagamaan', 'Teknologi', 'Olahraga & Terbuka'];
 

@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock, ShieldCheck } from 'lucide-react';
+import { getSiteSettings, SiteSettings } from '@/lib/storage';
 
 export default function Footer() {
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+
+  useEffect(() => {
+    setSettings(getSiteSettings());
+  }, []);
+
+  const phone = settings?.phone || '0812-6655-8123';
+  const email = settings?.email || 'smaitandalascendekia@gmail.com';
+  const address = settings?.address || 'Jorong Ranah Lintas, Nagari Tebing Tinggi, Kec. Pulau Punjung, Kab. Dharmasraya, Prov. Sumatera Barat';
+  const tagline = settings?.tagline || 'Sekolah Generasi Pemimpin Qur’ani';
+  const visi = settings?.visi || 'Mewujudkan Siswa Generasi Pemimpin Qur’ani';
+  const fb = settings?.facebookUrl || '#';
+  const ig = settings?.instagramUrl || '#';
+  const yt = settings?.youtubeUrl || '#';
+
   return (
     <footer className="relative bg-emerald-950 text-white overflow-hidden pt-16 pb-8 border-t border-emerald-900">
       {/* Background Decorative Blur Orbs */}
@@ -31,18 +47,18 @@ export default function Footer() {
 
             <div className="bg-emerald-900/60 backdrop-blur-sm rounded-2xl p-5 mb-6 border border-emerald-800/80">
               <h4 className="font-bold text-amber-400 text-xs uppercase tracking-wider mb-2">Tagline & Visi Sekolah</h4>
-              <p className="text-emerald-100 text-xs font-semibold italic mb-2">"Sekolah Generasi Pemimpin Qur’ani"</p>
+              <p className="text-emerald-100 text-xs font-semibold italic mb-2">"{tagline}"</p>
               <p className="text-emerald-200 text-xs leading-relaxed">
-                Mewujudkan Siswa Generasi Pemimpin Qur’ani yang beradab, berakhlak mulia, dan siap bersaing secara global.
+                {visi}
               </p>
             </div>
 
             <div>
               <h4 className="font-semibold text-xs text-slate-300 uppercase tracking-wider mb-3">Media Sosial Official</h4>
               <div className="flex space-x-2">
-                <a href="#" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">FB</a>
-                <a href="#" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">IG</a>
-                <a href="#" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">YT</a>
+                <a href={fb} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">FB</a>
+                <a href={ig} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">IG</a>
+                <a href={yt} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">YT</a>
               </div>
             </div>
           </div>
@@ -93,15 +109,15 @@ export default function Footer() {
             <div className="space-y-4 text-xs text-emerald-200">
               <div className="flex items-start gap-3">
                 <MapPin className="text-amber-400 shrink-0 mt-0.5" size={18} />
-                <span>Jorong Ranah Lintas, Nagari Tebing Tinggi, Kec. Pulau Punjung, Kab. Dharmasraya, Prov. Sumatera Barat</span>
+                <span>{address}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="text-amber-400 shrink-0" size={18} />
-                <span>0812-6655-8123</span>
+                <span>{phone}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="text-amber-400 shrink-0" size={18} />
-                <span>smaitandalascendekia@gmail.com</span>
+                <span>{email}</span>
               </div>
               <div className="flex items-start gap-3">
                 <Clock className="text-amber-400 shrink-0 mt-0.5" size={18} />

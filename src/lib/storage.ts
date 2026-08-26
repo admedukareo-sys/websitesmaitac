@@ -46,6 +46,9 @@ export interface SiteSettings {
   npsn: string;
   accreditation: string;
   videoUrl: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
 }
 
 export interface NewsItem {
@@ -84,6 +87,24 @@ export interface SlideItem {
   secondaryCtaLink: string;
 }
 
+export interface FacilityItem {
+  id: number;
+  title: string;
+  category: 'Akademik' | 'Keagamaan' | 'Teknologi' | 'Olahraga & Terbuka';
+  description: string;
+  imageUrl: string;
+}
+
+export interface TestimonialItem {
+  id: number;
+  name: string;
+  role: string;
+  rating: number;
+  quote: string;
+  avatarUrl: string;
+  timeAgo?: string;
+}
+
 const STORAGE_KEYS = {
   USERS: 'smait_users',
   REGISTRATIONS: 'smait_registrations',
@@ -92,6 +113,8 @@ const STORAGE_KEYS = {
   SITE_NEWS: 'smait_site_news',
   SITE_EVENTS: 'smait_site_events',
   SITE_SLIDES: 'smait_site_slides',
+  SITE_FACILITIES: 'smait_site_facilities',
+  SITE_TESTIMONIALS: 'smait_site_testimonials',
 };
 
 // Seed initial data if empty
@@ -144,24 +167,6 @@ function initializeStorage() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
-      {
-        id: 2,
-        userId: 3,
-        nisn: '0059876543',
-        nik: '1371012304050002',
-        birthPlace: 'Sungai Dareh',
-        birthDate: '2008-08-20',
-        gender: 'P',
-        address: 'Nagari Tebing Tinggi, Dharmasraya',
-        fatherName: 'Rahman Hakim',
-        motherName: 'Nurhaliza',
-        parentPhone: '081399887766',
-        previousSchool: 'MTsN 1 Dharmasraya',
-        status: 'DRAFT',
-        paymentStatus: 'UNPAID',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
     ];
     localStorage.setItem(STORAGE_KEYS.REGISTRATIONS, JSON.stringify(initialRegistrations));
   }
@@ -178,6 +183,9 @@ function initializeStorage() {
       npsn: '20104766',
       accreditation: 'Akreditasi A',
       videoUrl: 'https://www.youtube.com/embed/9E09XrFAi_s?autoplay=1',
+      facebookUrl: 'https://facebook.com',
+      instagramUrl: 'https://instagram.com',
+      youtubeUrl: 'https://youtube.com',
     };
     localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(defaultSettings));
   }
@@ -194,17 +202,6 @@ function initializeStorage() {
         imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
         excerpt: 'Delegasi SMA IT Andalas Cendekia kembali menorehkan prestasi gemilang dengan menjuarai kompetisi karya ilmiah dan aplikasi IT tingkat nasional.',
         content: 'Pada ajang Olimpiade Sains dan IT tingkat nasional yang diselenggarakan di Jakarta, tim siswa SMA IT Andalas Cendekia berhasil meraih Medali Emas Juara 1 dalam kategori Inovasi Aplikasi Edukasi Islami Berbasis AI. Kepala Sekolah memberikan apresiasi setinggi-tingginya atas perjuangan para siswa dan guru pendamping.',
-      },
-      {
-        id: 2,
-        title: 'Muria & Halal Bihalal Ramadhan: Santunan Anak Yatim dan Tahfidz Qur\'an',
-        category: 'Kegiatan Sekolah',
-        date: '15/04/2026',
-        author: 'Panitia Rohis',
-        commentsCount: 8,
-        imageUrl: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=800&q=80',
-        excerpt: 'Seluruh keluarga besar sekolah merayakan penutupan bulan suci dengan pembagian sembako, santunan, dan khataman Al-Qur\'an 30 Juz.',
-        content: 'Kegiatan rutin tahunan dalam rangka mengasah kepedulian sosial peserta didik dan mempererat tali silaturahmi antar warga sekolah, orang tua, dan masyarakat sekitar.',
       },
     ];
     localStorage.setItem(STORAGE_KEYS.SITE_NEWS, JSON.stringify(defaultNews));
@@ -240,41 +237,35 @@ function initializeStorage() {
         secondaryCtaText: 'Pelajari Lebih Lanjut',
         secondaryCtaLink: '/profil',
       },
-      {
-        id: 2,
-        badge: 'Program Unggulan Tahfidz Al-Qur\'an',
-        title: 'Target Hafalan 5-10 Juz Berlandaskan Adab Islami',
-        description: 'Pendampingan halaqah Al-Qur\'an harian bersama musyrif & musyrifah berpengalaman untuk mencetak alumni penghafal Al-Qur\'an mutqin.',
-        imageUrl: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1920&q=80',
-        primaryCtaText: 'Lihat Kurikulum & Program',
-        primaryCtaLink: '/kurikulum',
-        secondaryCtaText: 'Portal SPMB',
-        secondaryCtaLink: '/spmb',
-      },
-      {
-        id: 3,
-        badge: 'Fasilitas Digital & Smart Classroom',
-        title: 'Integrasi Sains, Teknologi IPTEK, dan Imtaq',
-        description: 'Laboratorium komputer canggih, kelas digital interaktif, dan akses e-learning 24/7 untuk mendukung pembelajaran berbasis abad 21.',
-        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80',
-        primaryCtaText: 'Jelajahi Kesiswaan',
-        primaryCtaLink: '/kesiswaan',
-        secondaryCtaText: 'Hubungi Kami',
-        secondaryCtaLink: '/kontak',
-      },
-      {
-        id: 4,
-        badge: 'Prestasi & Ekstrakurikuler',
-        title: 'Wadah Bakat, Kepemimpinan, dan Karakter Rabbani',
-        description: 'Lebih dari 24 ekstrakurikuler unggulan serta raihan 120+ prestasi tingkat kabupaten, provinsi, hingga nasional.',
-        imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1920&q=80',
-        primaryCtaText: 'Daftar SPMB Sekarang',
-        primaryCtaLink: '/spmb',
-        secondaryCtaText: 'Profil Sekolah',
-        secondaryCtaLink: '/profil',
-      },
     ];
     localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(defaultSlides));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_FACILITIES)) {
+    const defaultFacilities: FacilityItem[] = [
+      {
+        id: 1,
+        title: 'Smart Classroom Interaktif',
+        category: 'Akademik',
+        description: 'Ruang kelas dilengkapi pendingin udara, layar sentuh digital interaktif, dan sound system pendukung.',
+        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_FACILITIES, JSON.stringify(defaultFacilities));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_TESTIMONIALS)) {
+    const defaultTestimonials: TestimonialItem[] = [
+      {
+        id: 1,
+        name: 'Dr. H. Hendra Wijaya, M.Si.',
+        role: 'Orang Tua Siswa Kelas XI',
+        rating: 5,
+        quote: 'Alhamdulillah, perkembangan hafalan Al-Qur\'an dan kedisiplinan anak saya meningkat drastis semenjak bersekolah di SMA IT Andalas Cendekia.',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(defaultTestimonials));
   }
 }
 
@@ -412,6 +403,9 @@ export function getSiteSettings(): SiteSettings {
   if (!data.videoUrl) {
     data.videoUrl = 'https://www.youtube.com/embed/9E09XrFAi_s?autoplay=1';
   }
+  if (!data.facebookUrl) data.facebookUrl = 'https://facebook.com';
+  if (!data.instagramUrl) data.instagramUrl = 'https://instagram.com';
+  if (!data.youtubeUrl) data.youtubeUrl = 'https://youtube.com';
   return data;
 }
 
@@ -444,4 +438,22 @@ export function getSiteSlides(): SlideItem[] {
 
 export function saveSiteSlides(slides: SlideItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(slides));
+}
+
+export function getSiteFacilities(): FacilityItem[] {
+  initializeStorage();
+  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_FACILITIES) || '[]');
+}
+
+export function saveSiteFacilities(facilities: FacilityItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_FACILITIES, JSON.stringify(facilities));
+}
+
+export function getSiteTestimonials(): TestimonialItem[] {
+  initializeStorage();
+  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_TESTIMONIALS) || '[]');
+}
+
+export function saveSiteTestimonials(testimonials: TestimonialItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(testimonials));
 }

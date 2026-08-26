@@ -3,12 +3,14 @@ import {
   getSiteSettings, saveSiteSettings, SiteSettings,
   getSiteNews, saveSiteNews, NewsItem,
   getSiteEvents, saveSiteEvents, EventItem,
-  getSiteSlides, saveSiteSlides, SlideItem
+  getSiteSlides, saveSiteSlides, SlideItem,
+  getSiteFacilities, saveSiteFacilities, FacilityItem,
+  getSiteTestimonials, saveSiteTestimonials, TestimonialItem
 } from '@/lib/storage';
-import { Save, Plus, Edit2, Trash2, CheckCircle2, Newspaper, Calendar, Settings, Video, Sliders } from 'lucide-react';
+import { Save, Plus, Edit2, Trash2, CheckCircle2, Newspaper, Calendar, Settings, Video, Sliders, Building2, MessageSquareQuote, Star, Share2 } from 'lucide-react';
 
 export default function AdminContent() {
-  const [activeTab, setActiveTab] = useState<'SETTINGS' | 'SLIDES' | 'NEWS' | 'EVENTS'>('SLIDES');
+  const [activeTab, setActiveTab] = useState<'SETTINGS' | 'TESTIMONIALS' | 'FACILITIES' | 'SLIDES' | 'NEWS' | 'EVENTS'>('SETTINGS');
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
   // Settings State
@@ -23,7 +25,20 @@ export default function AdminContent() {
     npsn: '',
     accreditation: '',
     videoUrl: '',
+    facebookUrl: '',
+    instagramUrl: '',
+    youtubeUrl: '',
   });
+
+  // Testimonials State
+  const [testimonialsList, setTestimonialsList] = useState<TestimonialItem[]>([]);
+  const [editingTestimonial, setEditingTestimonial] = useState<TestimonialItem | null>(null);
+  const [isAddTestimonialModal, setIsAddTestimonialModal] = useState(false);
+
+  // Facilities State
+  const [facilitiesList, setFacilitiesList] = useState<FacilityItem[]>([]);
+  const [editingFacility, setEditingFacility] = useState<FacilityItem | null>(null);
+  const [isAddFacilityModal, setIsAddFacilityModal] = useState(false);
 
   // Slides State
   const [slidesList, setSlidesList] = useState<SlideItem[]>([]);
@@ -39,6 +54,19 @@ export default function AdminContent() {
   const [eventsList, setEventsList] = useState<EventItem[]>([]);
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [isAddEventModal, setIsAddEventModal] = useState(false);
+
+  // Testimonial Form
+  const [testiName, setTestiName] = useState('');
+  const [testiRole, setTestiRole] = useState('');
+  const [testiRating, setTestiRating] = useState(5);
+  const [testiQuote, setTestiQuote] = useState('');
+  const [testiAvatar, setTestiAvatar] = useState('');
+
+  // Facility Form
+  const [facTitle, setFacTitle] = useState('');
+  const [facCategory, setFacCategory] = useState<FacilityItem['category']>('Akademik');
+  const [facDesc, setFacDesc] = useState('');
+  const [facImage, setFacImage] = useState('');
 
   // Slide Form
   const [slideBadge, setSlideBadge] = useState('');
@@ -71,6 +99,8 @@ export default function AdminContent() {
 
   const loadAll = () => {
     setSettings(getSiteSettings());
+    setTestimonialsList(getSiteTestimonials());
+    setFacilitiesList(getSiteFacilities());
     setSlidesList(getSiteSlides());
     setNewsList(getSiteNews());
     setEventsList(getSiteEvents());
@@ -85,7 +115,7 @@ export default function AdminContent() {
     setTimeout(() => setSavedNotice(null), 4000);
   };
 
-  // Helper formatting URL YouTube menjadi embed format
+  // Helper formatting URL YouTube
   const formatYouTubeEmbed = (url: string) => {
     if (!url) return '';
     if (url.includes('youtube.com/embed/')) return url;
@@ -109,7 +139,145 @@ export default function AdminContent() {
     };
     saveSiteSettings(formattedSettings);
     setSettings(formattedSettings);
-    triggerNotice('Identitas, Kontak & Link Video Profil berhasil diperbarui!');
+    triggerNotice('Identitas, Kontak & Tautan Media Sosial berhasil diperbarui!');
+  };
+
+  // Testimonial Handlers
+  const handleAddTestimonial = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newTesti: TestimonialItem = {
+      id: Date.now(),
+      name: testiName,
+      role: testiRole,
+      rating: Number(testiRating) || 5,
+      quote: testiQuote,
+      avatarUrl: testiAvatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+    };
+
+    const updated = [newTesti, ...testimonialsList];
+    saveSiteTestimonials(updated);
+    setTestimonialsList(updated);
+    setIsAddTestimonialModal(false);
+    resetTestimonialForm();
+    triggerNotice('Testimoni baru berhasil ditambahkan!');
+  };
+
+  const handleEditTestimonialSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTestimonial) return;
+
+    const updated = testimonialsList.map((item) => {
+      if (item.id === editingTestimonial.id) {
+        return {
+          ...item,
+          name: testiName,
+          role: testiRole,
+          rating: Number(testiRating) || 5,
+          quote: testiQuote,
+          avatarUrl: testiAvatar,
+        };
+      }
+      return item;
+    });
+
+    saveSiteTestimonials(updated);
+    setTestimonialsList(updated);
+    setEditingTestimonial(null);
+    resetTestimonialForm();
+    triggerNotice('Testimoni berhasil diperbarui!');
+  };
+
+  const handleDeleteTestimonial = (id: number, name: string) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus testimoni dari "${name}"?`)) {
+      const filtered = testimonialsList.filter((t) => t.id !== id);
+      saveSiteTestimonials(filtered);
+      setTestimonialsList(filtered);
+      triggerNotice('Testimoni berhasil dihapus!');
+    }
+  };
+
+  const openEditTestimonialModal = (item: TestimonialItem) => {
+    setEditingTestimonial(item);
+    setTestiName(item.name);
+    setTestiRole(item.role);
+    setTestiRating(item.rating);
+    setTestiQuote(item.quote);
+    setTestiAvatar(item.avatarUrl);
+  };
+
+  const resetTestimonialForm = () => {
+    setTestiName('');
+    setTestiRole('');
+    setTestiRating(5);
+    setTestiQuote('');
+    setTestiAvatar('');
+  };
+
+  // Facility Handlers
+  const handleAddFacility = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newFac: FacilityItem = {
+      id: Date.now(),
+      title: facTitle,
+      category: facCategory,
+      description: facDesc,
+      imageUrl: facImage || 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+    };
+
+    const updated = [newFac, ...facilitiesList];
+    saveSiteFacilities(updated);
+    setFacilitiesList(updated);
+    setIsAddFacilityModal(false);
+    resetFacilityForm();
+    triggerNotice('Fasilitas sarana prasarana baru berhasil ditambahkan!');
+  };
+
+  const handleEditFacilitySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingFacility) return;
+
+    const updated = facilitiesList.map((item) => {
+      if (item.id === editingFacility.id) {
+        return {
+          ...item,
+          title: facTitle,
+          category: facCategory,
+          description: facDesc,
+          imageUrl: facImage,
+        };
+      }
+      return item;
+    });
+
+    saveSiteFacilities(updated);
+    setFacilitiesList(updated);
+    setEditingFacility(null);
+    resetFacilityForm();
+    triggerNotice('Fasilitas berhasil diperbarui!');
+  };
+
+  const handleDeleteFacility = (id: number, title: string) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus fasilitas "${title}"?`)) {
+      const filtered = facilitiesList.filter((f) => f.id !== id);
+      saveSiteFacilities(filtered);
+      setFacilitiesList(filtered);
+      triggerNotice('Fasilitas berhasil dihapus!');
+    }
+  };
+
+  const openEditFacilityModal = (item: FacilityItem) => {
+    setEditingFacility(item);
+    setFacTitle(item.title);
+    setFacCategory(item.category);
+    setFacDesc(item.description);
+    setFacImage(item.imageUrl);
+  };
+
+  const resetFacilityForm = () => {
+    setFacTitle('');
+    setFacCategory('Akademik');
+    setFacDesc('');
+    setFacImage('');
   };
 
   // Slide Handlers
@@ -328,7 +496,7 @@ export default function AdminContent() {
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-slate-800">Pengelola Isi Website (Admin CMS)</h1>
         <p className="text-slate-500 text-xs mt-1">
-          Perbarui slide banner beranda, foto slider, informasi sekolah, berita, dan agenda acara secara real-time.
+          Perbarui tautan media sosial, identitas sekolah, testimoni orang tua, sarana prasarana, slide hero slider, berita, dan agenda secara real-time.
         </p>
       </div>
 
@@ -341,19 +509,7 @@ export default function AdminContent() {
       )}
 
       {/* Tabs Bar */}
-      <div className="flex border-b border-slate-200 mb-8 space-x-2">
-        <button
-          onClick={() => setActiveTab('SLIDES')}
-          className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
-            activeTab === 'SLIDES'
-              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Sliders size={16} />
-          <span>Hero Slider Beranda ({slidesList.length})</span>
-        </button>
-
+      <div className="flex flex-wrap border-b border-slate-200 mb-8 gap-2">
         <button
           onClick={() => setActiveTab('SETTINGS')}
           className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
@@ -363,7 +519,43 @@ export default function AdminContent() {
           }`}
         >
           <Settings size={16} />
-          <span>Identitas & Video Profil</span>
+          <span>Identitas & Media Sosial</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('TESTIMONIALS')}
+          className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
+            activeTab === 'TESTIMONIALS'
+              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <MessageSquareQuote size={16} />
+          <span>Testimoni ({testimonialsList.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('FACILITIES')}
+          className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
+            activeTab === 'FACILITIES'
+              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Building2 size={16} />
+          <span>Sarana Prasarana ({facilitiesList.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('SLIDES')}
+          className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
+            activeTab === 'SLIDES'
+              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Sliders size={16} />
+          <span>Hero Slider ({slidesList.length})</span>
         </button>
 
         <button
@@ -375,7 +567,7 @@ export default function AdminContent() {
           }`}
         >
           <Newspaper size={16} />
-          <span>Berita & Pengumuman ({newsList.length})</span>
+          <span>Berita ({newsList.length})</span>
         </button>
 
         <button
@@ -387,81 +579,14 @@ export default function AdminContent() {
           }`}
         >
           <Calendar size={16} />
-          <span>Agenda Acara ({eventsList.length})</span>
+          <span>Agenda ({eventsList.length})</span>
         </button>
       </div>
 
-      {/* TAB: HERO SLIDER BANNER CMS */}
-      {activeTab === 'SLIDES' && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800">Daftar Slide Foto Hero Banner</h2>
-              <p className="text-xs text-slate-500">Edit gambar latar, judul, deskripsi, dan tombol aksi slider beranda utama.</p>
-            </div>
-
-            <button
-              onClick={() => { resetSlideForm(); setIsAddSlideModal(true); }}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full text-xs transition-all shadow flex items-center gap-2"
-            >
-              <Plus size={16} /> Tambah Slide Baru
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {slidesList.map((slide, idx) => (
-              <div key={slide.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
-                <div>
-                  {/* Thumbnail Image Preview */}
-                  <div className="relative aspect-[16/8] bg-slate-900 overflow-hidden">
-                    <img 
-                      src={slide.imageUrl} 
-                      alt={slide.title} 
-                      className="w-full h-full object-cover opacity-80"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
-                    <span className="absolute top-3 left-3 bg-amber-500 text-amber-950 text-[10px] font-extrabold px-3 py-1 rounded-full shadow uppercase">
-                      Slide 0{idx + 1}
-                    </span>
-                  </div>
-
-                  <div className="p-6">
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mb-2">
-                      {slide.badge}
-                    </span>
-                    <h3 className="font-bold text-slate-900 text-base mb-2">{slide.title}</h3>
-                    <p className="text-slate-600 text-xs line-clamp-2 leading-relaxed mb-4">{slide.description}</p>
-                    
-                    <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-500 bg-slate-50 p-2.5 rounded-xl border">
-                      <span>Tombol Utama: <strong>{slide.primaryCtaText}</strong> ({slide.primaryCtaLink})</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-6 pb-6 pt-0 flex items-center justify-end gap-2 border-t border-slate-100 mt-2 pt-4">
-                  <button 
-                    onClick={() => openEditSlideModal(slide)}
-                    className="flex items-center gap-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-xl transition-colors"
-                  >
-                    <Edit2 size={14} /> Edit Slide
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteSlide(slide.id, slide.title)}
-                    className="flex items-center gap-1 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl transition-colors"
-                  >
-                    <Trash2 size={14} /> Hapus
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 1: IDENTITAS & LINK VIDEO PROFIL */}
+      {/* TAB 1: IDENTITAS, KONTAK & MEDIA SOSIAL */}
       {activeTab === 'SETTINGS' && (
         <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 max-w-4xl">
-          <h2 className="text-xl font-bold text-slate-800 border-b pb-3">Informasi Kelembagaan & Video Profil</h2>
+          <h2 className="text-xl font-bold text-slate-800 border-b pb-3">Informasi Kelembagaan, Kontak & Media Sosial</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
             <div>
@@ -484,6 +609,45 @@ export default function AdminContent() {
               />
             </div>
 
+            {/* Media Sosial Fields */}
+            <div className="md:col-span-2 bg-emerald-50/60 p-5 rounded-2xl border border-emerald-200/80 space-y-4">
+              <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2 text-emerald-900">
+                <Share2 size={16} /> Tautan Akun Media Sosial Official
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Facebook URL</label>
+                  <input 
+                    type="url" placeholder="https://facebook.com/smaitandalascendekia"
+                    value={settings.facebookUrl || ''}
+                    onChange={(e) => setSettings({ ...settings, facebookUrl: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px] bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Instagram URL</label>
+                  <input 
+                    type="url" placeholder="https://instagram.com/smaitandalascendekia"
+                    value={settings.instagramUrl || ''}
+                    onChange={(e) => setSettings({ ...settings, instagramUrl: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px] bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">YouTube URL Channel</label>
+                  <input 
+                    type="url" placeholder="https://youtube.com/@smaitandalascendekia"
+                    value={settings.youtubeUrl || ''}
+                    onChange={(e) => setSettings({ ...settings, youtubeUrl: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px] bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="md:col-span-2">
               <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5 text-emerald-700">
                 <Video size={16} />
@@ -491,14 +655,11 @@ export default function AdminContent() {
               </label>
               <input 
                 type="text" 
-                placeholder="Contoh: https://www.youtube.com/watch?v=9E09XrFAi_s atau https://youtu.be/9E09XrFAi_s"
+                placeholder="Contoh: https://www.youtube.com/watch?v=9E09XrFAi_s"
                 value={settings.videoUrl}
                 onChange={(e) => setSettings({ ...settings, videoUrl: e.target.value })}
                 className="w-full px-3 py-2.5 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px] bg-emerald-50/40"
               />
-              <p className="text-[11px] text-slate-500 mt-1">
-                Video ini akan diputar saat pengunjung mengklik tombol <strong>"Tonton Video Profil"</strong> di beranda utama.
-              </p>
             </div>
 
             <div className="md:col-span-2">
@@ -547,10 +708,196 @@ export default function AdminContent() {
               type="submit"
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-full text-xs transition-colors shadow flex items-center gap-2"
             >
-              <Save size={16} /> Simpan Perubahan Profil & Link Video
+              <Save size={16} /> Simpan Perubahan Profil & Media Sosial
             </button>
           </div>
         </form>
+      )}
+
+      {/* TAB: KELOLA TESTIMONI ORANG TUA */}
+      {activeTab === 'TESTIMONIALS' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Daftar Testimoni Orang Tua & Alumni</h2>
+              <p className="text-xs text-slate-500">Tambah, edit nama, rating bintang, foto profil, dan kutipan testimoni.</p>
+            </div>
+
+            <button
+              onClick={() => { resetTestimonialForm(); setIsAddTestimonialModal(true); }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full text-xs transition-all shadow flex items-center gap-2"
+            >
+              <Plus size={16} /> Tambah Testimoni Baru
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {testimonialsList.map((t) => (
+              <div key={t.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-1 text-amber-400 mb-3">
+                    {[...Array(t.rating || 5)].map((_, i) => (
+                      <Star key={i} size={14} fill="currentColor" />
+                    ))}
+                  </div>
+
+                  <p className="text-slate-600 text-xs italic line-clamp-4 leading-relaxed mb-4">
+                    "{t.quote}"
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={t.avatarUrl} 
+                      alt={t.name} 
+                      className="w-10 h-10 rounded-full object-cover border shrink-0"
+                    />
+                    <div>
+                      <h4 className="font-bold text-slate-800 text-xs">{t.name}</h4>
+                      <p className="text-slate-500 text-[11px]">{t.role}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-1">
+                    <button 
+                      onClick={() => openEditTestimonialModal(t)}
+                      className="p-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteTestimonial(t.id, t.name)}
+                      className="p-1.5 rounded bg-red-50 hover:bg-red-100 text-red-600"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: KELOLA SARANA PRASARANA / FASILITAS */}
+      {activeTab === 'FACILITIES' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Daftar Fasilitas Sarana & Prasarana</h2>
+              <p className="text-xs text-slate-500">Kelola foto, nama fasilitas, kategori, dan deskripsi sarana sekolah.</p>
+            </div>
+
+            <button
+              onClick={() => { resetFacilityForm(); setIsAddFacilityModal(true); }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full text-xs transition-all shadow flex items-center gap-2"
+            >
+              <Plus size={16} /> Tambah Fasilitas Baru
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {facilitiesList.map((fac) => (
+              <div key={fac.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="relative aspect-[4/3] bg-slate-900 overflow-hidden">
+                    <img 
+                      src={fac.imageUrl} 
+                      alt={fac.title} 
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow">
+                      {fac.category}
+                    </span>
+                  </div>
+
+                  <div className="p-6">
+                    <h3 className="font-bold text-slate-900 text-base mb-2">{fac.title}</h3>
+                    <p className="text-slate-600 text-xs line-clamp-3 leading-relaxed">{fac.description}</p>
+                  </div>
+                </div>
+
+                <div className="px-6 pb-6 pt-0 flex items-center justify-end gap-2 border-t border-slate-100 mt-2 pt-4">
+                  <button 
+                    onClick={() => openEditFacilityModal(fac)}
+                    className="flex items-center gap-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 px-3.5 py-2 rounded-xl transition-colors"
+                  >
+                    <Edit2 size={14} /> Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteFacility(fac.id, fac.title)}
+                    className="flex items-center gap-1 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 px-3.5 py-2 rounded-xl transition-colors"
+                  >
+                    <Trash2 size={14} /> Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: HERO SLIDER BANNER CMS */}
+      {activeTab === 'SLIDES' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Daftar Slide Foto Hero Banner</h2>
+              <p className="text-xs text-slate-500">Edit gambar latar, judul, deskripsi, dan tombol aksi slider beranda utama.</p>
+            </div>
+
+            <button
+              onClick={() => { resetSlideForm(); setIsAddSlideModal(true); }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full text-xs transition-all shadow flex items-center gap-2"
+            >
+              <Plus size={16} /> Tambah Slide Baru
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {slidesList.map((slide, idx) => (
+              <div key={slide.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="relative aspect-[16/8] bg-slate-900 overflow-hidden">
+                    <img 
+                      src={slide.imageUrl} 
+                      alt={slide.title} 
+                      className="w-full h-full object-cover opacity-80"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                    <span className="absolute top-3 left-3 bg-amber-500 text-amber-950 text-[10px] font-extrabold px-3 py-1 rounded-full shadow uppercase">
+                      Slide 0{idx + 1}
+                    </span>
+                  </div>
+
+                  <div className="p-6">
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mb-2">
+                      {slide.badge}
+                    </span>
+                    <h3 className="font-bold text-slate-900 text-base mb-2">{slide.title}</h3>
+                    <p className="text-slate-600 text-xs line-clamp-2 leading-relaxed mb-4">{slide.description}</p>
+                  </div>
+                </div>
+
+                <div className="px-6 pb-6 pt-0 flex items-center justify-end gap-2 border-t border-slate-100 mt-2 pt-4">
+                  <button 
+                    onClick={() => openEditSlideModal(slide)}
+                    className="flex items-center gap-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2 rounded-xl transition-colors"
+                  >
+                    <Edit2 size={14} /> Edit Slide
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteSlide(slide.id, slide.title)}
+                    className="flex items-center gap-1 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl transition-colors"
+                  >
+                    <Trash2 size={14} /> Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* TAB 2: KELOLA BERITA & PENGUMUMAN */}
@@ -644,6 +991,152 @@ export default function AdminContent() {
         </div>
       )}
 
+      {/* Modal Add / Edit Testimonial */}
+      {(isAddTestimonialModal || editingTestimonial) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+              {editingTestimonial ? 'Edit Testimoni Orang Tua' : 'Tambah Testimoni Baru'}
+            </h3>
+
+            <form onSubmit={editingTestimonial ? handleEditTestimonialSubmit : handleAddTestimonial} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Nama Orang Tua / Alumni</label>
+                <input 
+                  type="text" required placeholder="Contoh: Dr. H. Hendra Wijaya, M.Si."
+                  value={testiName} onChange={(e) => setTestiName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Peran / Status</label>
+                <input 
+                  type="text" required placeholder="Contoh: Orang Tua Siswa Kelas XI"
+                  value={testiRole} onChange={(e) => setTestiRole(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Rating Bintang (1 - 5)</label>
+                <select 
+                  value={testiRating} onChange={(e) => setTestiRating(Number(e.target.value))}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                >
+                  <option value={5}>5 Bintang (Sangat Puas)</option>
+                  <option value={4}>4 Bintang (Puas)</option>
+                  <option value={3}>3 Bintang (Cukup)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">URL Foto Profil Avatar</label>
+                <input 
+                  type="url" required placeholder="https://images.unsplash.com/..."
+                  value={testiAvatar} onChange={(e) => setTestiAvatar(e.target.value)}
+                  className="w-full px-3 py-2 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Kutipan Testimoni</label>
+                <textarea 
+                  rows={3} required placeholder="Tuliskan pengalaman dan kesan selama menyekolahkan anak di SMA IT..."
+                  value={testiQuote} onChange={(e) => setTestiQuote(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                ></textarea>
+              </div>
+
+              <div className="pt-4 border-t flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddTestimonialModal(false); setEditingTestimonial(null); }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 font-bold"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold shadow"
+                >
+                  Simpan Testimoni
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Add / Edit Facility */}
+      {(isAddFacilityModal || editingFacility) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+              {editingFacility ? 'Edit Fasilitas / Sarana' : 'Tambah Fasilitas Baru'}
+            </h3>
+
+            <form onSubmit={editingFacility ? handleEditFacilitySubmit : handleAddFacility} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Nama Fasilitas / Ruangan</label>
+                <input 
+                  type="text" required placeholder="Contoh: Smart Classroom Interaktif"
+                  value={facTitle} onChange={(e) => setFacTitle(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Kategori Fasilitas</label>
+                <select 
+                  value={facCategory} onChange={(e) => setFacCategory(e.target.value as any)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                >
+                  <option value="Akademik">Akademik</option>
+                  <option value="Keagamaan">Keagamaan</option>
+                  <option value="Teknologi">Teknologi</option>
+                  <option value="Olahraga & Terbuka">Olahraga & Terbuka</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">URL Foto Fasilitas</label>
+                <input 
+                  type="url" required placeholder="https://images.unsplash.com/..."
+                  value={facImage} onChange={(e) => setFacImage(e.target.value)}
+                  className="w-full px-3 py-2 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Deskripsi Fasilitas</label>
+                <textarea 
+                  rows={3} required placeholder="Tuliskan spesifikasi dan keunggulan fasilitas..."
+                  value={facDesc} onChange={(e) => setFacDesc(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                ></textarea>
+              </div>
+
+              <div className="pt-4 border-t flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddFacilityModal(false); setEditingFacility(null); }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 font-bold"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold shadow"
+                >
+                  Simpan Fasilitas
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Modal Add / Edit Slide */}
       {(isAddSlideModal || editingSlide) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
@@ -683,48 +1176,10 @@ export default function AdminContent() {
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Deskripsi Ringkas Slide</label>
                 <textarea 
-                  rows={3} required placeholder="Tuliskan penjelas ringkas mengenai program / sekolah..."
+                  rows={3} required placeholder="Tuliskan penjelas ringkas..."
                   value={slideDesc} onChange={(e) => setSlideDesc(e.target.value)}
                   className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
                 ></textarea>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Teks Tombol Utama</label>
-                  <input 
-                    type="text" placeholder="Daftar SPMB Sekarang"
-                    value={slidePrimaryText} onChange={(e) => setSlidePrimaryText(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-xl outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Link Tombol Utama</label>
-                  <input 
-                    type="text" placeholder="/spmb"
-                    value={slidePrimaryLink} onChange={(e) => setSlidePrimaryLink(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-xl outline-none font-mono text-[11px]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Teks Tombol Sekunder</label>
-                  <input 
-                    type="text" placeholder="Pelajari Lebih Lanjut"
-                    value={slideSecondaryText} onChange={(e) => setSlideSecondaryText(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-xl outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Link Tombol Sekunder</label>
-                  <input 
-                    type="text" placeholder="/profil"
-                    value={slideSecondaryLink} onChange={(e) => setSlideSecondaryLink(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-xl outline-none font-mono text-[11px]"
-                  />
-                </div>
               </div>
 
               <div className="pt-4 border-t flex justify-end gap-2">
