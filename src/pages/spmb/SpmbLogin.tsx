@@ -79,12 +79,6 @@ export default function SpmbLogin() {
             {loading ? 'Memproses...' : 'Masuk'}
           </button>
         </form>
-
-        <div className="mt-6 pt-6 border-t border-slate-100 text-xs text-slate-500">
-          <p className="font-semibold mb-1">Demo Credentials:</p>
-          <p>• Siswa: <code className="bg-slate-100 px-1 py-0.5 rounded">zaki@gmail.com</code> / pass: <code className="bg-slate-100 px-1 py-0.5 rounded">password123</code></p>
-          <p>• Admin: <code className="bg-slate-100 px-1 py-0.5 rounded">admin@smait.sch.id</code> / pass: <code className="bg-slate-100 px-1 py-0.5 rounded">admin</code></p>
-        </div>
       </div>
     </div>
   );

@@ -1,19 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, Award, CheckCircle2, UserCheck, Shield, GraduationCap, Phone, Mail, MapPin, Calendar, Globe } from 'lucide-react';
+import { getSiteSettings, getSiteTeachers, SiteSettings, TeacherItem } from '@/lib/storage';
 
 export default function Profil() {
-  const teacherList = [
-    { name: 'Fadhilah Ikhtiarni, M.Pd.', role: 'Kepala Sekolah', mapel: 'Manajerial & Kepemimpinan', strata: 'S2' },
-    { name: 'Novrika mawarni, S.Pd.', role: 'Waka Kurikulum', mapel: 'Biologi, Kimia, B. Inggris, Mentoring Qur\'anic Leader', strata: 'S1' },
-    { name: 'Sherly Mairiyasti L., S.Pd.', role: 'Waka Kesiswaan', mapel: 'Ekonomi, Sejarah, Geografi, Sosiologi', strata: 'S1' },
-    { name: 'Rayun Sucinda, M.Pd.', role: 'Waka Sarpras', mapel: 'Adab & Al-Qur\'an, Pendidikan Pancasila', strata: 'S2' },
-    { name: 'Yuyun Rahmanita, S.Kom.', role: 'Tata Usaha / Administrasi', mapel: 'Sistem Informasi & Administrasi', strata: 'S1' },
-    { name: 'Vivi Safitri, S.Pd.', role: 'Guru Bidang Studi', mapel: 'Bahasa Indonesia', strata: 'S1' },
-    { name: 'Ade Pahmi Paizal, S.T', role: 'Guru Bidang Studi', mapel: 'Informatika & Komputer', strata: 'S1' },
-    { name: 'Febri Uljapi, S.Hum', role: 'Guru Bidang Studi', mapel: 'Bahasa Arab, Akidah, Fiqh, Sejarah Peradaban Islam', strata: 'S1' },
-    { name: 'St. Irvan Charis, S.Pd.', role: 'Guru Bidang Studi', mapel: 'PJOK (Pendidikan Jasmani Olahraga)', strata: 'S1' },
-    { name: 'Dela Oktavia H., S.Pd.', role: 'Guru Bidang Studi', mapel: 'Bimbingan Konseling (BK)', strata: 'S1' },
-  ];
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [teacherList, setTeacherList] = useState<TeacherItem[]>([]);
+
+  const loadData = () => {
+    setSettings(getSiteSettings());
+    const teachers = getSiteTeachers();
+    setTeacherList(Array.isArray(teachers) ? teachers : []);
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
+  }, []);
+
+  const schoolName = settings?.schoolName || 'SMA IT Andalas Cendekia';
+  const tagline = settings?.tagline || 'Sekolah Generasi Pemimpin Qur’ani';
+  const visi = settings?.visi || 'Mewujudkan Siswa Generasi Pemimpin Qur’ani';
+  const address = settings?.address || 'Jorong Ranah Lintas, Nagari Tebing Tinggi, Kec. Pulau Punjung, Kab. Dharmasraya, Prov. Sumatera Barat';
+  const phone = settings?.phone || '0812-6655-8123';
+  const email = settings?.email || 'smaitandalascendekia@gmail.com';
+  const website = settings?.website || 'https://smait.andalascendekia.sch.id/';
+  const principalName = settings?.principalName || 'Fadhilah Ikhtiarni, M.Pd.';
+  const principalTitle = settings?.principalTitle || 'Kepala Sekolah SMA IT Andalas Cendekia';
+  const principalMessage = settings?.principalMessage || "Assalamu'alaikum Warahmatullahi Wabarakatuh. Selamat datang di portal resmi SMA IT Andalas Cendekia. Kami berkomitmen menyelenggarakan pendidikan yang membekali pendidikan agama, adab dan akhlak mulia, kecakapan hidup kekinian, serta penguasaan sains dan teknologi untuk membentuk Generasi Pemimpin Qur'ani.";
+  const principalPhoto = settings?.principalPhotoUrl || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80';
+  const historyText = settings?.historyText || 'SMA IT Andalas Cendekia didirikan pada tanggal 5 Mei 2024 di Kabupaten Dharmasraya, Sumatera Barat. Lembaga ini hadir sebagai komitmen nyata untuk mencetak generasi pemimpin Qur\'ani yang berakhlak mulia, cerdas akademis, berwawasan global, dan siap bersaing di perguruan tinggi terkemuka.';
 
   const misiList = [
     'Menyelenggarakan pendidikan berbasis Al-Qur’an dan nilai-nilai Islam yang terintegrasi dengan kurikulum nasional.',
@@ -46,10 +64,10 @@ export default function Profil() {
           <span className="inline-block bg-amber-500 text-amber-950 px-4 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider mb-4 shadow">
             Profil Resmi Sekolah
           </span>
-          <h1 className="text-3xl sm:text-5xl font-extrabold mb-3">SMA IT Andalas Cendekia</h1>
-          <p className="text-amber-300 font-semibold text-lg italic mb-2">"Sekolah Generasi Pemimpin Qur’ani"</p>
+          <h1 className="text-3xl sm:text-5xl font-extrabold mb-3">{schoolName}</h1>
+          <p className="text-amber-300 font-semibold text-lg italic mb-2">"{tagline}"</p>
           <p className="text-emerald-200 text-sm max-w-2xl mx-auto">
-            Lembaga pendidikan menengah atas Islam terpadu di Dharmasraya yang membentuk generasi beradab, berprestasi, dan siap menuju perguruan tinggi favorit.
+            {historyText}
           </p>
         </div>
       </div>
@@ -64,7 +82,7 @@ export default function Profil() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-800">A. Identitas Sekolah</h2>
-              <p className="text-xs text-slate-500">Data Pokok Kelembagaan SMA IT Andalas Cendekia</p>
+              <p className="text-xs text-slate-500">Data Pokok Kelembagaan {schoolName}</p>
             </div>
           </div>
 
@@ -72,7 +90,7 @@ export default function Profil() {
             <div className="space-y-3">
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Nama Sekolah</span>
-                <span className="font-bold text-slate-800">SMA IT Andalas Cendekia</span>
+                <span className="font-bold text-slate-800">{schoolName}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Jenjang Pendidikan</span>
@@ -88,7 +106,7 @@ export default function Profil() {
               </div>
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Tagline / Branding</span>
-                <span className="font-bold text-amber-600">Sekolah Generasi Pemimpin Qur’ani</span>
+                <span className="font-bold text-amber-600">{tagline}</span>
               </div>
             </div>
 
@@ -96,20 +114,20 @@ export default function Profil() {
               <div className="py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium block mb-1">Alamat Lengkap</span>
                 <span className="font-semibold text-slate-800 leading-relaxed block">
-                  Jorong Ranah Lintas, Nagari Tebing Tinggi, Kec. Pulau Punjung, Kab. Dharmasraya, Prov. Sumatera Barat
+                  {address}
                 </span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Nomor Telepon</span>
-                <span className="font-bold text-slate-800">0812-6655-8123</span>
+                <span className="font-bold text-slate-800">{phone}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Email Official</span>
-                <span className="font-bold text-emerald-700">smaitandalascendekia@gmail.com</span>
+                <span className="font-bold text-emerald-700">{email}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-100">
                 <span className="text-slate-500 font-medium">Website Official</span>
-                <span className="font-bold text-blue-600">https://smait.andalascendekia.sch.id/</span>
+                <span className="font-bold text-blue-600">{website}</span>
               </div>
             </div>
           </div>
@@ -119,15 +137,16 @@ export default function Profil() {
         <section className="bg-gradient-to-r from-emerald-900 to-emerald-950 text-white p-8 sm:p-10 rounded-3xl shadow-xl border border-emerald-800">
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="w-32 h-32 bg-amber-500 rounded-2xl shrink-0 flex items-center justify-center overflow-hidden border-4 border-amber-400/50 shadow-lg">
-              <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80" alt="Kepala Sekolah" className="object-cover w-full h-full" />
+              <img src={principalPhoto} alt={principalName} className="object-cover w-full h-full" />
             </div>
             <div>
               <span className="text-amber-400 text-xs font-bold uppercase tracking-wider mb-2 inline-block">Sambutan Kepala Sekolah</span>
-              <h2 className="text-2xl font-bold mb-3 text-white">Fadhilah Ikhtiarni, M.Pd.</h2>
+              <h2 className="text-2xl font-bold mb-1 text-white">{principalName}</h2>
+              <p className="text-xs font-semibold text-amber-300 mb-3">{principalTitle}</p>
               <p className="text-emerald-100 text-sm leading-relaxed italic mb-4">
-                "Assalamu'alaikum Warahmatullahi Wabarakatuh. Selamat datang di portal resmi SMA IT Andalas Cendekia. Kami berkomitmen menyelenggarakan pendidikan yang membekali pendidikan agama, adab dan akhlak mulia, kecakapan hidup kekinian, serta penguasaan sains dan teknologi untuk membentuk Generasi Pemimpin Qur'ani."
+                "{principalMessage}"
               </p>
-              <div className="font-bold text-amber-400 text-xs">- Kepala Sekolah SMA IT Andalas Cendekia</div>
+              <div className="font-bold text-amber-400 text-xs">- {principalName}</div>
             </div>
           </div>
         </section>
@@ -136,14 +155,14 @@ export default function Profil() {
         <section className="bg-white rounded-3xl p-8 sm:p-10 shadow-sm border border-slate-200/80">
           <div className="text-center max-w-3xl mx-auto mb-10">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">Visi, Misi, & Tujuan Sekolah</h2>
-            <p className="text-slate-600 text-sm">Landasan nilai dan arah pandang pendidikan di SMA IT Andalas Cendekia.</p>
+            <p className="text-slate-600 text-sm">Landasan nilai dan arah pandang pendidikan di {schoolName}.</p>
           </div>
 
           {/* Visi */}
           <div className="bg-emerald-50 border-2 border-emerald-200 p-8 rounded-2xl mb-10 text-center">
             <span className="text-xs font-bold text-emerald-800 uppercase tracking-widest block mb-2">Visi Utama</span>
             <p className="text-xl sm:text-2xl font-extrabold text-emerald-950">
-              "Mewujudkan Siswa Generasi Pemimpin Qur’ani"
+              "{visi}"
             </p>
           </div>
 
@@ -189,7 +208,7 @@ export default function Profil() {
           <div className="flex items-center justify-between mb-8 border-b pb-4">
             <div>
               <h2 className="text-2xl font-bold text-slate-800">C. Data Kepemimpinan & Tenaga Pendidik</h2>
-              <p className="text-xs text-slate-500">Struktur Organisasi & Dewan Guru SMA IT Andalas Cendekia</p>
+              <p className="text-xs text-slate-500">Struktur Organisasi & Dewan Guru {schoolName}</p>
             </div>
             <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">
               Tahun Ajaran 2026/2027
@@ -207,8 +226,8 @@ export default function Profil() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                {teacherList.map((t, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                {(Array.isArray(teacherList) ? teacherList : []).map((t, idx) => (
+                  <tr key={t.id || idx} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3.5 px-4 font-bold text-slate-900">{t.name}</td>
                     <td className="py-3.5 px-4 font-semibold text-emerald-700">{t.role}</td>
                     <td className="py-3.5 px-4 text-slate-600">{t.mapel}</td>

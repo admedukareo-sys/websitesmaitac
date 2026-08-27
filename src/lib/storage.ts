@@ -1,3 +1,5 @@
+import { api } from './api';
+
 export interface User {
   id: number;
   name: string;
@@ -49,6 +51,11 @@ export interface SiteSettings {
   facebookUrl?: string;
   instagramUrl?: string;
   youtubeUrl?: string;
+  principalName?: string;
+  principalTitle?: string;
+  principalMessage?: string;
+  principalPhotoUrl?: string;
+  historyText?: string;
 }
 
 export interface NewsItem {
@@ -105,6 +112,36 @@ export interface TestimonialItem {
   timeAgo?: string;
 }
 
+export interface ActivityAchievementItem {
+  id: number;
+  title: string;
+  type: 'Prestasi' | 'Aktivitas Kesiswaan' | 'Ekstrakurikuler';
+  category: string;
+  date: string;
+  studentName: string;
+  achievementBadge: string;
+  description: string;
+  imageUrl: string;
+}
+
+export interface CurriculumTahfidzItem {
+  id: number;
+  title: string;
+  type: 'Program Tahfidz' | 'Program Kurikulum' | 'Profil Lulusan';
+  target: string;
+  description: string;
+  badgeColor?: string;
+}
+
+export interface TeacherItem {
+  id: number;
+  name: string;
+  role: string;
+  mapel: string;
+  strata: string;
+  photoUrl?: string;
+}
+
 const STORAGE_KEYS = {
   USERS: 'smait_users',
   REGISTRATIONS: 'smait_registrations',
@@ -115,6 +152,9 @@ const STORAGE_KEYS = {
   SITE_SLIDES: 'smait_site_slides',
   SITE_FACILITIES: 'smait_site_facilities',
   SITE_TESTIMONIALS: 'smait_site_testimonials',
+  SITE_ACTIVITIES: 'smait_site_activities',
+  SITE_CURRICULUM: 'smait_site_curriculum',
+  SITE_TEACHERS: 'smait_site_teachers',
 };
 
 // Seed initial data if empty
@@ -132,13 +172,6 @@ function initializeStorage() {
         id: 2,
         name: 'Ahmad Zaki',
         email: 'zaki@gmail.com',
-        role: 'STUDENT',
-        password: 'password123',
-      },
-      {
-        id: 3,
-        name: 'Fatimah Az-Zahra',
-        email: 'fatimah@gmail.com',
         role: 'STUDENT',
         password: 'password123',
       },
@@ -186,6 +219,11 @@ function initializeStorage() {
       facebookUrl: 'https://facebook.com',
       instagramUrl: 'https://instagram.com',
       youtubeUrl: 'https://youtube.com',
+      principalName: 'Fadhilah Ikhtiarni, M.Pd.',
+      principalTitle: 'Kepala Sekolah SMA IT Andalas Cendekia',
+      principalMessage: 'Assalamu\'alaikum Warahmatullahi Wabarakatuh. Selamat datang di portal resmi SMA IT Andalas Cendekia. Kami berkomitmen menyelenggarakan pendidikan yang membekali pendidikan agama, adab dan akhlak mulia, kecakapan hidup kekinian, serta penguasaan sains dan teknologi untuk membentuk Generasi Pemimpin Qur\'ani.',
+      principalPhotoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+      historyText: 'SMA IT Andalas Cendekia didirikan pada tanggal 5 Mei 2024 di Kabupaten Dharmasraya, Sumatera Barat. Lembaga ini hadir sebagai komitmen nyata untuk mencetak generasi pemimpin Qur\'ani yang berakhlak mulia, cerdas akademis, berwawasan global, dan siap bersaing di perguruan tinggi terkemuka.',
     };
     localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(defaultSettings));
   }
@@ -267,6 +305,53 @@ function initializeStorage() {
     ];
     localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(defaultTestimonials));
   }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_ACTIVITIES)) {
+    const defaultActivities: ActivityAchievementItem[] = [
+      {
+        id: 1,
+        title: 'Juara 1 Medali Emas Olimpiade IT & AI Nasional 2026',
+        type: 'Prestasi',
+        category: 'Tingkat Nasional',
+        date: '2026',
+        studentName: 'Tim Robotik & Coding SMA IT',
+        achievementBadge: 'Juara 1 Emas',
+        description: 'Meraih penghargaan tertinggi pada kategori pengembangan aplikasi kecerdasan buatan untuk pendidikan Al-Qur\'an.',
+        imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_ACTIVITIES, JSON.stringify(defaultActivities));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_CURRICULUM)) {
+    const defaultCurriculum: CurriculumTahfidzItem[] = [
+      {
+        id: 1,
+        title: 'Program Hafalan Tahfidz Al-Qur\'an Intensif',
+        type: 'Program Tahfidz',
+        target: 'Target 5 - 10 Juz Mutqin',
+        description: 'Setoran halaqah harian bersama musyrif/musyrifah, karantina murojaah, dan wisuda sertifikasi Tahfidz.',
+        badgeColor: 'bg-emerald-600',
+      },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_CURRICULUM, JSON.stringify(defaultCurriculum));
+  }
+
+  if (!localStorage.getItem(STORAGE_KEYS.SITE_TEACHERS)) {
+    const defaultTeachers: TeacherItem[] = [
+      { id: 1, name: 'Fadhilah Ikhtiarni, M.Pd.', role: 'Kepala Sekolah', mapel: 'Manajerial & Kepemimpinan', strata: 'S2' },
+      { id: 2, name: 'Novrika mawarni, S.Pd.', role: 'Waka Kurikulum', mapel: 'Biologi, Kimia, B. Inggris, Mentoring Qur\'anic Leader', strata: 'S1' },
+      { id: 3, name: 'Sherly Mairiyasti L., S.Pd.', role: 'Waka Kesiswaan', mapel: 'Ekonomi, Sejarah, Geografi, Sosiologi', strata: 'S1' },
+      { id: 4, name: 'Rayun Sucinda, M.Pd.', role: 'Waka Sarpras', mapel: 'Adab & Al-Qur\'an, Pendidikan Pancasila', strata: 'S2' },
+      { id: 5, name: 'Yuyun Rahmanita, S.Kom.', role: 'Tata Usaha / Administrasi', mapel: 'Sistem Informasi & Administrasi', strata: 'S1' },
+      { id: 6, name: 'Vivi Safitri, S.Pd.', role: 'Guru Bidang Studi', mapel: 'Bahasa Indonesia', strata: 'S1' },
+      { id: 7, name: 'Ade Pahmi Paizal, S.T', role: 'Guru Bidang Studi', mapel: 'Informatika & Komputer', strata: 'S1' },
+      { id: 8, name: 'Febri Uljapi, S.Hum', role: 'Guru Bidang Studi', mapel: 'Bahasa Arab, Akidah, Fiqh, Sejarah Peradaban Islam', strata: 'S1' },
+      { id: 9, name: 'St. Irvan Charis, S.Pd.', role: 'Guru Bidang Studi', mapel: 'PJOK (Pendidikan Jasmani Olahraga)', strata: 'S1' },
+      { id: 10, name: 'Dela Oktavia H., S.Pd.', role: 'Guru Bidang Studi', mapel: 'Bimbingan Konseling (BK)', strata: 'S1' },
+    ];
+    localStorage.setItem(STORAGE_KEYS.SITE_TEACHERS, JSON.stringify(defaultTeachers));
+  }
 }
 
 export function getUsers(): User[] {
@@ -309,9 +394,10 @@ export function setCurrentUser(user: User | null) {
 export function updateRegistration(userId: number, updates: Partial<Registration>): Registration {
   const regs = getRegistrations();
   let index = regs.findIndex((r) => r.userId === userId);
+  let updatedReg: Registration;
   
   if (index === -1) {
-    const newReg: Registration = {
+    updatedReg = {
       id: Date.now(),
       userId,
       status: 'DRAFT',
@@ -320,18 +406,18 @@ export function updateRegistration(userId: number, updates: Partial<Registration
       updatedAt: new Date().toISOString(),
       ...updates,
     };
-    regs.push(newReg);
-    saveRegistrations(regs);
-    return newReg;
+    regs.push(updatedReg);
   } else {
-    regs[index] = {
+    updatedReg = {
       ...regs[index],
       ...updates,
       updatedAt: new Date().toISOString(),
     };
-    saveRegistrations(regs);
-    return regs[index];
+    regs[index] = updatedReg;
   }
+  saveRegistrations(regs);
+  api.saveRegistration(updatedReg);
+  return updatedReg;
 }
 
 export function updateRegistrationById(id: number, updates: Partial<Registration>): Registration | null {
@@ -399,23 +485,49 @@ export function addRegistrationByAdmin(data: {
 // Site Content CMS Helpers
 export function getSiteSettings(): SiteSettings {
   initializeStorage();
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_SETTINGS) || '{}');
-  if (!data.videoUrl) {
-    data.videoUrl = 'https://www.youtube.com/embed/9E09XrFAi_s?autoplay=1';
+  let data: any = {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_SETTINGS);
+    if (raw) data = JSON.parse(raw);
+  } catch (e) {
+    data = {};
   }
-  if (!data.facebookUrl) data.facebookUrl = 'https://facebook.com';
-  if (!data.instagramUrl) data.instagramUrl = 'https://instagram.com';
-  if (!data.youtubeUrl) data.youtubeUrl = 'https://youtube.com';
-  return data;
+  return {
+    schoolName: data.schoolName || data.school_name || 'SMA IT Andalas Cendekia',
+    tagline: data.tagline || 'Sekolah Generasi Pemimpin Qur’ani',
+    visi: data.visi || 'Mewujudkan Siswa Generasi Pemimpin Qur’ani',
+    address: data.address || 'Jorong Ranah Lintas, Nagari Tebing Tinggi, Kec. Pulau Punjung, Kab. Dharmasraya, Prov. Sumatera Barat',
+    phone: data.phone || '0812-6655-8123',
+    email: data.email || 'smaitandalascendekia@gmail.com',
+    website: data.website || 'https://smait.andalascendekia.sch.id/',
+    npsn: data.npsn || '20104766',
+    accreditation: data.accreditation || 'Akreditasi A',
+    videoUrl: data.videoUrl || data.video_url || 'https://www.youtube.com/embed/9E09XrFAi_s?autoplay=1',
+    facebookUrl: data.facebookUrl || data.facebook_url || 'https://facebook.com',
+    instagramUrl: data.instagramUrl || data.instagram_url || 'https://instagram.com',
+    youtubeUrl: data.youtubeUrl || data.youtube_url || 'https://youtube.com',
+    principalName: data.principalName || data.principal_name || 'Fadhilah Ikhtiarni, M.Pd.',
+    principalTitle: data.principalTitle || data.principal_title || 'Kepala Sekolah SMA IT Andalas Cendekia',
+    principalMessage: data.principalMessage || data.principal_message || "Assalamu'alaikum Warahmatullahi Wabarakatuh. Selamat datang di portal resmi SMA IT Andalas Cendekia. Kami berkomitmen menyelenggarakan pendidikan yang membekali pendidikan agama, adab dan akhlak mulia, kecakapan hidup kekinian, serta penguasaan sains dan teknologi untuk membentuk Generasi Pemimpin Qur'ani.",
+    principalPhotoUrl: data.principalPhotoUrl || data.principal_photo_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+    historyText: data.historyText || data.history_text || 'SMA IT Andalas Cendekia didirikan pada tanggal 5 Mei 2024 di Kabupaten Dharmasraya, Sumatera Barat. Lembaga ini hadir sebagai komitmen nyata untuk mencetak generasi pemimpin Qur\'ani yang berakhlak mulia, cerdas akademis, berwawasan global, dan siap bersaing di perguruan tinggi terkemuka.',
+  };
 }
 
 export function saveSiteSettings(settings: SiteSettings) {
   localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(settings));
+  api.saveSettings(settings);
 }
 
 export function getSiteNews(): NewsItem[] {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_NEWS) || '[]');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_NEWS);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveSiteNews(news: NewsItem[]) {
@@ -424,7 +536,13 @@ export function saveSiteNews(news: NewsItem[]) {
 
 export function getSiteEvents(): EventItem[] {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_EVENTS) || '[]');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_EVENTS);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveSiteEvents(events: EventItem[]) {
@@ -433,7 +551,13 @@ export function saveSiteEvents(events: EventItem[]) {
 
 export function getSiteSlides(): SlideItem[] {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_SLIDES) || '[]');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_SLIDES);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveSiteSlides(slides: SlideItem[]) {
@@ -442,7 +566,13 @@ export function saveSiteSlides(slides: SlideItem[]) {
 
 export function getSiteFacilities(): FacilityItem[] {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_FACILITIES) || '[]');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_FACILITIES);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveSiteFacilities(facilities: FacilityItem[]) {
@@ -451,9 +581,131 @@ export function saveSiteFacilities(facilities: FacilityItem[]) {
 
 export function getSiteTestimonials(): TestimonialItem[] {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SITE_TESTIMONIALS) || '[]');
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_TESTIMONIALS);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveSiteTestimonials(testimonials: TestimonialItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(testimonials));
 }
+
+export function getSiteActivities(): ActivityAchievementItem[] {
+  initializeStorage();
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_ACTIVITIES);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveSiteActivities(activities: ActivityAchievementItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_ACTIVITIES, JSON.stringify(activities));
+}
+
+export function getSiteCurriculum(): CurriculumTahfidzItem[] {
+  initializeStorage();
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_CURRICULUM);
+    const data = raw ? JSON.parse(raw) : [];
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveSiteCurriculum(curriculum: CurriculumTahfidzItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_CURRICULUM, JSON.stringify(curriculum));
+}
+
+export function getSiteTeachers(): TeacherItem[] {
+  initializeStorage();
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SITE_TEACHERS);
+    const data = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(data)) return [];
+    return data.map((t: any, idx: number) => ({
+      id: t.id || idx + 1,
+      name: t.name || '',
+      role: t.role || '',
+      mapel: t.mapel || '',
+      strata: t.strata || 'S1',
+      photoUrl: t.photoUrl || t.photo_url || '',
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveSiteTeachers(teachers: TeacherItem[]) {
+  localStorage.setItem(STORAGE_KEYS.SITE_TEACHERS, JSON.stringify(teachers));
+  api.saveTeachers?.(teachers);
+}
+
+export async function syncWithBackend() {
+  try {
+    let updated = false;
+
+    // 1. Sync Settings
+    const settings = await api.getSettings();
+    if (settings && typeof settings === 'object' && Object.keys(settings).length > 0) {
+      const current = getSiteSettings();
+      const normalizedSettings: SiteSettings = {
+        schoolName: settings.schoolName || settings.school_name || current.schoolName,
+        tagline: settings.tagline || current.tagline,
+        visi: settings.visi || current.visi,
+        address: settings.address || current.address,
+        phone: settings.phone || current.phone,
+        email: settings.email || current.email,
+        website: settings.website || current.website,
+        npsn: settings.npsn || current.npsn,
+        accreditation: settings.accreditation || current.accreditation,
+        videoUrl: settings.videoUrl || settings.video_url || current.videoUrl,
+        facebookUrl: settings.facebookUrl || settings.facebook_url || current.facebookUrl,
+        instagramUrl: settings.instagramUrl || settings.instagram_url || current.instagramUrl,
+        youtubeUrl: settings.youtubeUrl || settings.youtube_url || current.youtubeUrl,
+        principalName: settings.principalName || settings.principal_name || current.principalName,
+        principalTitle: settings.principalTitle || settings.principal_title || current.principalTitle,
+        principalMessage: settings.principalMessage || settings.principal_message || current.principalMessage,
+        principalPhotoUrl: settings.principalPhotoUrl || settings.principal_photo_url || current.principalPhotoUrl,
+        historyText: settings.historyText || settings.history_text || current.historyText,
+      };
+      localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(normalizedSettings));
+      updated = true;
+    }
+
+    // 2. Sync Teachers
+    const teachers = await api.getTeachers();
+    if (teachers && Array.isArray(teachers) && teachers.length > 0) {
+      const normalizedTeachers = teachers.map((t: any, idx: number) => ({
+        id: t.id || idx + 1,
+        name: t.name || '',
+        role: t.role || '',
+        mapel: t.mapel || '',
+        strata: t.strata || 'S1',
+        photoUrl: t.photoUrl || t.photo_url || '',
+      }));
+      localStorage.setItem(STORAGE_KEYS.SITE_TEACHERS, JSON.stringify(normalizedTeachers));
+      updated = true;
+    }
+
+    if (updated && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('smait_data_synced'));
+    }
+  } catch (e) {
+    console.warn('[Sync] Offline or backend unreachable, using localStorage');
+  }
+}
+
+// Auto-trigger sync on module import in browser environment
+if (typeof window !== 'undefined') {
+  syncWithBackend();
+}
+
+

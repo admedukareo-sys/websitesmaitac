@@ -5,12 +5,15 @@ import {
   getSiteEvents, saveSiteEvents, EventItem,
   getSiteSlides, saveSiteSlides, SlideItem,
   getSiteFacilities, saveSiteFacilities, FacilityItem,
-  getSiteTestimonials, saveSiteTestimonials, TestimonialItem
+  getSiteTestimonials, saveSiteTestimonials, TestimonialItem,
+  getSiteActivities, saveSiteActivities, ActivityAchievementItem,
+  getSiteCurriculum, saveSiteCurriculum, CurriculumTahfidzItem,
+  getSiteTeachers, saveSiteTeachers, TeacherItem
 } from '@/lib/storage';
-import { Save, Plus, Edit2, Trash2, CheckCircle2, Newspaper, Calendar, Settings, Video, Sliders, Building2, MessageSquareQuote, Star, Share2 } from 'lucide-react';
+import { Save, Plus, Edit2, Trash2, CheckCircle2, Newspaper, Calendar, Settings, Video, Sliders, Building2, MessageSquareQuote, Star, Share2, Award, BookOpen, User, Users } from 'lucide-react';
 
 export default function AdminContent() {
-  const [activeTab, setActiveTab] = useState<'SETTINGS' | 'TESTIMONIALS' | 'FACILITIES' | 'SLIDES' | 'NEWS' | 'EVENTS'>('SETTINGS');
+  const [activeTab, setActiveTab] = useState<'SETTINGS' | 'TEACHERS' | 'CURRICULUM' | 'ACTIVITIES' | 'TESTIMONIALS' | 'FACILITIES' | 'SLIDES' | 'NEWS' | 'EVENTS'>('TEACHERS');
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
   // Settings State
@@ -28,7 +31,27 @@ export default function AdminContent() {
     facebookUrl: '',
     instagramUrl: '',
     youtubeUrl: '',
+    principalName: '',
+    principalTitle: '',
+    principalMessage: '',
+    principalPhotoUrl: '',
+    historyText: '',
   });
+
+  // Teachers State
+  const [teachersList, setTeachersList] = useState<TeacherItem[]>([]);
+  const [editingTeacher, setEditingTeacher] = useState<TeacherItem | null>(null);
+  const [isAddTeacherModal, setIsAddTeacherModal] = useState(false);
+
+  // Curriculum & Tahfidz State
+  const [curriculumList, setCurriculumList] = useState<CurriculumTahfidzItem[]>([]);
+  const [editingCurriculum, setEditingCurriculum] = useState<CurriculumTahfidzItem | null>(null);
+  const [isAddCurriculumModal, setIsAddCurriculumModal] = useState(false);
+
+  // Activities & Achievements State
+  const [activitiesList, setActivitiesList] = useState<ActivityAchievementItem[]>([]);
+  const [editingActivity, setEditingActivity] = useState<ActivityAchievementItem | null>(null);
+  const [isAddActivityModal, setIsAddActivityModal] = useState(false);
 
   // Testimonials State
   const [testimonialsList, setTestimonialsList] = useState<TestimonialItem[]>([]);
@@ -54,6 +77,28 @@ export default function AdminContent() {
   const [eventsList, setEventsList] = useState<EventItem[]>([]);
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [isAddEventModal, setIsAddEventModal] = useState(false);
+
+  // Teacher Form
+  const [teacherName, setTeacherName] = useState('');
+  const [teacherRole, setTeacherRole] = useState('');
+  const [teacherMapel, setTeacherMapel] = useState('');
+  const [teacherStrata, setTeacherStrata] = useState('S1');
+
+  // Curriculum Form
+  const [currTitle, setCurrTitle] = useState('');
+  const [currType, setCurrType] = useState<CurriculumTahfidzItem['type']>('Program Tahfidz');
+  const [currTarget, setCurrTarget] = useState('');
+  const [currDesc, setCurrDesc] = useState('');
+
+  // Activity Form
+  const [actTitle, setActTitle] = useState('');
+  const [actType, setActType] = useState<ActivityAchievementItem['type']>('Prestasi');
+  const [actCategory, setActCategory] = useState('');
+  const [actDate, setActDate] = useState('');
+  const [actStudentName, setActStudentName] = useState('');
+  const [actBadge, setActBadge] = useState('');
+  const [actDesc, setActDesc] = useState('');
+  const [actImage, setActImage] = useState('');
 
   // Testimonial Form
   const [testiName, setTestiName] = useState('');
@@ -99,6 +144,9 @@ export default function AdminContent() {
 
   const loadAll = () => {
     setSettings(getSiteSettings());
+    setTeachersList(getSiteTeachers());
+    setCurriculumList(getSiteCurriculum());
+    setActivitiesList(getSiteActivities());
     setTestimonialsList(getSiteTestimonials());
     setFacilitiesList(getSiteFacilities());
     setSlidesList(getSiteSlides());
@@ -139,7 +187,225 @@ export default function AdminContent() {
     };
     saveSiteSettings(formattedSettings);
     setSettings(formattedSettings);
-    triggerNotice('Identitas, Kontak & Tautan Media Sosial berhasil diperbarui!');
+    triggerNotice('Profil, Visi, Sambutan Kepsek & Tautan Media Sosial berhasil diperbarui!');
+  };
+
+  // Teachers Handlers
+  const handleAddTeacher = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newTeacher: TeacherItem = {
+      id: Date.now(),
+      name: teacherName,
+      role: teacherRole,
+      mapel: teacherMapel,
+      strata: teacherStrata,
+    };
+
+    const updated = [...teachersList, newTeacher];
+    saveSiteTeachers(updated);
+    setTeachersList(updated);
+    setIsAddTeacherModal(false);
+    resetTeacherForm();
+    triggerNotice('Tenaga pendidik / guru baru berhasil ditambahkan!');
+  };
+
+  const handleEditTeacherSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTeacher) return;
+
+    const updated = teachersList.map((item) => {
+      if (item.id === editingTeacher.id) {
+        return {
+          ...item,
+          name: teacherName,
+          role: teacherRole,
+          mapel: teacherMapel,
+          strata: teacherStrata,
+        };
+      }
+      return item;
+    });
+
+    saveSiteTeachers(updated);
+    setTeachersList(updated);
+    setEditingTeacher(null);
+    resetTeacherForm();
+    triggerNotice('Data tenaga pendidik berhasil diperbarui!');
+  };
+
+  const handleDeleteTeacher = (id: number, name: string) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus data pendidik "${name}"?`)) {
+      const filtered = teachersList.filter((t) => t.id !== id);
+      saveSiteTeachers(filtered);
+      setTeachersList(filtered);
+      triggerNotice('Data pendidik berhasil dihapus!');
+    }
+  };
+
+  const openEditTeacherModal = (item: TeacherItem) => {
+    setEditingTeacher(item);
+    setTeacherName(item.name);
+    setTeacherRole(item.role);
+    setTeacherMapel(item.mapel);
+    setTeacherStrata(item.strata);
+  };
+
+  const resetTeacherForm = () => {
+    setTeacherName('');
+    setTeacherRole('');
+    setTeacherMapel('');
+    setTeacherStrata('S1');
+  };
+
+  // Curriculum & Tahfidz Handlers
+  const handleAddCurriculum = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newCurr: CurriculumTahfidzItem = {
+      id: Date.now(),
+      title: currTitle,
+      type: currType,
+      target: currTarget,
+      description: currDesc,
+      badgeColor: currType === 'Program Tahfidz' ? 'bg-emerald-600' : currType === 'Profil Lulusan' ? 'bg-amber-600' : 'bg-blue-600',
+    };
+
+    const updated = [newCurr, ...curriculumList];
+    saveSiteCurriculum(updated);
+    setCurriculumList(updated);
+    setIsAddCurriculumModal(false);
+    resetCurriculumForm();
+    triggerNotice('Program Kurikulum / Tahfidz baru berhasil ditambahkan!');
+  };
+
+  const handleEditCurriculumSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCurriculum) return;
+
+    const updated = curriculumList.map((item) => {
+      if (item.id === editingCurriculum.id) {
+        return {
+          ...item,
+          title: currTitle,
+          type: currType,
+          target: currTarget,
+          description: currDesc,
+        };
+      }
+      return item;
+    });
+
+    saveSiteCurriculum(updated);
+    setCurriculumList(updated);
+    setEditingCurriculum(null);
+    resetCurriculumForm();
+    triggerNotice('Program Kurikulum / Tahfidz berhasil diperbarui!');
+  };
+
+  const handleDeleteCurriculum = (id: number, title: string) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus "${title}"?`)) {
+      const filtered = curriculumList.filter((c) => c.id !== id);
+      saveSiteCurriculum(filtered);
+      setCurriculumList(filtered);
+      triggerNotice('Program Kurikulum / Tahfidz berhasil dihapus!');
+    }
+  };
+
+  const openEditCurriculumModal = (item: CurriculumTahfidzItem) => {
+    setEditingCurriculum(item);
+    setCurrTitle(item.title);
+    setCurrType(item.type);
+    setCurrTarget(item.target);
+    setCurrDesc(item.description);
+  };
+
+  const resetCurriculumForm = () => {
+    setCurrTitle('');
+    setCurrType('Program Tahfidz');
+    setCurrTarget('');
+    setCurrDesc('');
+  };
+
+  // Activity & Achievement Handlers
+  const handleAddActivity = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newAct: ActivityAchievementItem = {
+      id: Date.now(),
+      title: actTitle,
+      type: actType,
+      category: actCategory || 'Prestasi Siswa',
+      date: actDate || new Date().getFullYear().toString(),
+      studentName: actStudentName || 'Siswa SMA IT',
+      achievementBadge: actBadge || 'Juara',
+      description: actDesc,
+      imageUrl: actImage || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
+    };
+
+    const updated = [newAct, ...activitiesList];
+    saveSiteActivities(updated);
+    setActivitiesList(updated);
+    setIsAddActivityModal(false);
+    resetActivityForm();
+    triggerNotice('Aktivitas / Prestasi siswa baru berhasil ditambahkan!');
+  };
+
+  const handleEditActivitySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingActivity) return;
+
+    const updated = activitiesList.map((item) => {
+      if (item.id === editingActivity.id) {
+        return {
+          ...item,
+          title: actTitle,
+          type: actType,
+          category: actCategory,
+          date: actDate,
+          studentName: actStudentName,
+          achievementBadge: actBadge,
+          description: actDesc,
+          imageUrl: actImage,
+        };
+      }
+      return item;
+    });
+
+    saveSiteActivities(updated);
+    setActivitiesList(updated);
+    setEditingActivity(null);
+    resetActivityForm();
+    triggerNotice('Aktivitas / Prestasi siswa berhasil diperbarui!');
+  };
+
+  const handleDeleteActivity = (id: number, title: string) => {
+    if (window.confirm(`Apakah Anda yakin ingin menghapus "${title}"?`)) {
+      const filtered = activitiesList.filter((a) => a.id !== id);
+      saveSiteActivities(filtered);
+      setActivitiesList(filtered);
+      triggerNotice('Aktivitas / Prestasi berhasil dihapus!');
+    }
+  };
+
+  const openEditActivityModal = (item: ActivityAchievementItem) => {
+    setEditingActivity(item);
+    setActTitle(item.title);
+    setActType(item.type);
+    setActCategory(item.category);
+    setActDate(item.date);
+    setActStudentName(item.studentName);
+    setActBadge(item.achievementBadge);
+    setActDesc(item.description);
+    setActImage(item.imageUrl);
+  };
+
+  const resetActivityForm = () => {
+    setActTitle('');
+    setActType('Prestasi');
+    setActCategory('');
+    setActDate('');
+    setActStudentName('');
+    setActBadge('');
+    setActDesc('');
+    setActImage('');
   };
 
   // Testimonial Handlers
@@ -496,7 +762,7 @@ export default function AdminContent() {
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-slate-800">Pengelola Isi Website (Admin CMS)</h1>
         <p className="text-slate-500 text-xs mt-1">
-          Perbarui tautan media sosial, identitas sekolah, testimoni orang tua, sarana prasarana, slide hero slider, berita, dan agenda secara real-time.
+          Perbarui profil & visi sekolah, kepemimpinan & tenaga pendidik, kurikulum & tahfidz, aktivitas & prestasi siswa, sarana prasarana, tautan media sosial, hero slider, berita, dan agenda secara real-time.
         </p>
       </div>
 
@@ -511,6 +777,18 @@ export default function AdminContent() {
       {/* Tabs Bar */}
       <div className="flex flex-wrap border-b border-slate-200 mb-8 gap-2">
         <button
+          onClick={() => setActiveTab('TEACHERS')}
+          className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
+            activeTab === 'TEACHERS'
+              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Users size={16} />
+          <span>Tenaga Pendidik & Guru ({teachersList.length})</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('SETTINGS')}
           className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
             activeTab === 'SETTINGS'
@@ -519,7 +797,31 @@ export default function AdminContent() {
           }`}
         >
           <Settings size={16} />
-          <span>Identitas & Media Sosial</span>
+          <span>Identitas, Visi & Profil</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('CURRICULUM')}
+          className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
+            activeTab === 'CURRICULUM'
+              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <BookOpen size={16} />
+          <span>Kurikulum & Tahfidz ({curriculumList.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('ACTIVITIES')}
+          className={`flex items-center gap-2 px-6 py-3 font-bold text-xs border-b-2 transition-colors ${
+            activeTab === 'ACTIVITIES'
+              ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 rounded-t-xl'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Award size={16} />
+          <span>Aktivitas & Prestasi ({activitiesList.length})</span>
         </button>
 
         <button
@@ -583,10 +885,75 @@ export default function AdminContent() {
         </button>
       </div>
 
-      {/* TAB 1: IDENTITAS, KONTAK & MEDIA SOSIAL */}
+      {/* TAB: KELOLA TENAGA PENDIDIK & GURU */}
+      {activeTab === 'TEACHERS' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Daftar Kepemimpinan & Tenaga Pendidik</h2>
+              <p className="text-xs text-slate-500">Kelola nama guru, gelar, jabatan struktural, mata pelajaran/tugas, dan strata pendidikan.</p>
+            </div>
+
+            <button
+              onClick={() => { resetTeacherForm(); setIsAddTeacherModal(true); }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full text-xs transition-all shadow flex items-center gap-2"
+            >
+              <Plus size={16} /> Tambah Guru / Pendidik
+            </button>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                    <th className="py-3.5 px-4">Nama Pendidik & Gelar</th>
+                    <th className="py-3.5 px-4">Jabatan Struktural</th>
+                    <th className="py-3.5 px-4">Mata Pelajaran / Bidang Tugas</th>
+                    <th className="py-3.5 px-4 text-center">Strata</th>
+                    <th className="py-3.5 px-4 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+                  {teachersList.map((t) => (
+                    <tr key={t.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3.5 px-4 font-bold text-slate-900">{t.name}</td>
+                      <td className="py-3.5 px-4 font-semibold text-emerald-700">{t.role}</td>
+                      <td className="py-3.5 px-4 text-slate-600">{t.mapel}</td>
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="bg-slate-100 text-slate-800 px-2.5 py-0.5 rounded-full font-mono font-bold text-[11px]">
+                          {t.strata}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button 
+                            onClick={() => openEditTeacherModal(t)}
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteTeacher(t.id, t.name)}
+                            className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 1: IDENTITAS, VISI, SAMBUTAN KEPSEK & MEDIA SOSIAL */}
       {activeTab === 'SETTINGS' && (
         <form onSubmit={handleSaveSettings} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6 max-w-4xl">
-          <h2 className="text-xl font-bold text-slate-800 border-b pb-3">Informasi Kelembagaan, Kontak & Media Sosial</h2>
+          <h2 className="text-xl font-bold text-slate-800 border-b pb-3">Informasi Profil, Visi, Sambutan Kepala Sekolah & Kontak</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
             <div>
@@ -595,7 +962,7 @@ export default function AdminContent() {
                 type="text" 
                 value={settings.schoolName}
                 onChange={(e) => setSettings({ ...settings, schoolName: e.target.value })}
-                className="w-full px-3 py-2.5 border rounded-xl outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2.5 border rounded-xl outline-none focus:border-emerald-500 font-bold"
               />
             </div>
 
@@ -607,6 +974,77 @@ export default function AdminContent() {
                 onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
                 className="w-full px-3 py-2.5 border rounded-xl outline-none focus:border-emerald-500"
               />
+            </div>
+
+            {/* Visi Sekolah */}
+            <div className="md:col-span-2 bg-emerald-50/80 p-5 rounded-2xl border border-emerald-200">
+              <label className="block font-bold text-emerald-950 text-sm mb-1">Visi Utama Sekolah</label>
+              <input 
+                type="text" 
+                value={settings.visi}
+                onChange={(e) => setSettings({ ...settings, visi: e.target.value })}
+                className="w-full px-3 py-2.5 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500 font-bold text-sm bg-white"
+              />
+            </div>
+
+            {/* Sambutan Kepala Sekolah Fields */}
+            <div className="md:col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+              <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2 text-emerald-900">
+                <User size={16} /> Pengaturan Sambutan Kepala Sekolah
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Nama Kepala Sekolah</label>
+                  <input 
+                    type="text" placeholder="Fadhilah Ikhtiarni, M.Pd."
+                    value={settings.principalName || ''}
+                    onChange={(e) => setSettings({ ...settings, principalName: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-semibold bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Jabatan / Gelar Struktural</label>
+                  <input 
+                    type="text" placeholder="Kepala Sekolah SMA IT Andalas Cendekia"
+                    value={settings.principalTitle || ''}
+                    onChange={(e) => setSettings({ ...settings, principalTitle: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">URL Foto Profil Kepala Sekolah</label>
+                <input 
+                  type="url" placeholder="https://images.unsplash.com/..."
+                  value={settings.principalPhotoUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, principalPhotoUrl: e.target.value })}
+                  className="w-full px-3 py-2 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px] bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Naskah Sambutan Kepala Sekolah</label>
+                <textarea 
+                  rows={3}
+                  value={settings.principalMessage || ''}
+                  onChange={(e) => setSettings({ ...settings, principalMessage: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 bg-white leading-relaxed"
+                ></textarea>
+              </div>
+            </div>
+
+            {/* Ringkasan Profil & Sejarah */}
+            <div className="md:col-span-2">
+              <label className="block font-bold text-slate-700 mb-1">Deskripsi Ringkasan Profil & Sejarah Sekolah</label>
+              <textarea 
+                rows={3}
+                value={settings.historyText || ''}
+                onChange={(e) => setSettings({ ...settings, historyText: e.target.value })}
+                className="w-full px-3 py-2.5 border rounded-xl outline-none focus:border-emerald-500"
+              ></textarea>
             </div>
 
             {/* Media Sosial Fields */}
@@ -663,16 +1101,6 @@ export default function AdminContent() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block font-bold text-slate-700 mb-1">Visi Utama Sekolah</label>
-              <input 
-                type="text" 
-                value={settings.visi}
-                onChange={(e) => setSettings({ ...settings, visi: e.target.value })}
-                className="w-full px-3 py-2.5 border rounded-xl outline-none focus:border-emerald-500"
-              />
-            </div>
-
-            <div className="md:col-span-2">
               <label className="block font-bold text-slate-700 mb-1">Alamat Lengkap Sekolah</label>
               <textarea 
                 rows={2}
@@ -708,10 +1136,128 @@ export default function AdminContent() {
               type="submit"
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-full text-xs transition-colors shadow flex items-center gap-2"
             >
-              <Save size={16} /> Simpan Perubahan Profil & Media Sosial
+              <Save size={16} /> Simpan Perubahan Profil & Visi Sekolah
             </button>
           </div>
         </form>
+      )}
+
+      {/* TAB: KELOLA KURIKULUM & TAHFIDZ */}
+      {activeTab === 'CURRICULUM' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Daftar Program Kurikulum, Tahfidz & Profil Lulusan</h2>
+              <p className="text-xs text-slate-500">Tambah, edit judul program khas, target pencapaian hafalan/akademik, dan deskripsi.</p>
+            </div>
+
+            <button
+              onClick={() => { resetCurriculumForm(); setIsAddCurriculumModal(true); }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full text-xs transition-all shadow flex items-center gap-2"
+            >
+              <Plus size={16} /> Tambah Program Baru
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {curriculumList.map((item) => (
+              <div key={item.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                      {item.type}
+                    </span>
+                  </div>
+
+                  <h3 className="font-bold text-slate-900 text-base mb-2">{item.title}</h3>
+                  <p className="text-xs font-bold text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 mb-3">
+                    🎯 {item.target}
+                  </p>
+                  <p className="text-slate-600 text-xs line-clamp-3 leading-relaxed mb-4">{item.description}</p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+                  <button 
+                    onClick={() => openEditCurriculumModal(item)}
+                    className="flex items-center gap-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 px-3.5 py-2 rounded-xl transition-colors"
+                  >
+                    <Edit2 size={14} /> Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteCurriculum(item.id, item.title)}
+                    className="flex items-center gap-1 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 px-3.5 py-2 rounded-xl transition-colors"
+                  >
+                    <Trash2 size={14} /> Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: KELOLA AKTIVITAS & PRESTASI SISWA */}
+      {activeTab === 'ACTIVITIES' && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Daftar Aktivitas, Ekstrakurikuler & Prestasi</h2>
+              <p className="text-xs text-slate-500">Kelola judul, jenis (Prestasi / Aktivitas / Ekskul), nama siswa/tim, badge juara, foto, dan deskripsi.</p>
+            </div>
+
+            <button
+              onClick={() => { resetActivityForm(); setIsAddActivityModal(true); }}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-full text-xs transition-all shadow flex items-center gap-2"
+            >
+              <Plus size={16} /> Tambah Aktivitas / Prestasi
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {activitiesList.map((act) => (
+              <div key={act.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="relative aspect-[16/10] bg-slate-900 overflow-hidden">
+                    <img 
+                      src={act.imageUrl} 
+                      alt={act.title} 
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute top-3 left-3 bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow">
+                      {act.type}
+                    </span>
+                    <span className="absolute top-3 right-3 bg-amber-500 text-amber-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow">
+                      {act.achievementBadge}
+                    </span>
+                  </div>
+
+                  <div className="p-6">
+                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mb-2">
+                      {act.category} • {act.studentName}
+                    </span>
+                    <h3 className="font-bold text-slate-900 text-base mb-2">{act.title}</h3>
+                    <p className="text-slate-600 text-xs line-clamp-3 leading-relaxed">{act.description}</p>
+                  </div>
+                </div>
+
+                <div className="px-6 pb-6 pt-0 flex items-center justify-end gap-2 border-t border-slate-100 mt-2 pt-4">
+                  <button 
+                    onClick={() => openEditActivityModal(act)}
+                    className="flex items-center gap-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 px-3.5 py-2 rounded-xl transition-colors"
+                  >
+                    <Edit2 size={14} /> Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteActivity(act.id, act.title)}
+                    className="flex items-center gap-1 text-xs font-bold bg-red-50 hover:bg-red-100 text-red-600 px-3.5 py-2 rounded-xl transition-colors"
+                  >
+                    <Trash2 size={14} /> Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* TAB: KELOLA TESTIMONI ORANG TUA */}
@@ -987,6 +1533,251 @@ export default function AdminContent() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Add / Edit Teacher */}
+      {(isAddTeacherModal || editingTeacher) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+              {editingTeacher ? 'Edit Data Tenaga Pendidik / Guru' : 'Tambah Guru / Pendidik Baru'}
+            </h3>
+
+            <form onSubmit={editingTeacher ? handleEditTeacherSubmit : handleAddTeacher} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Nama Lengkap Pendidik & Gelar</label>
+                <input 
+                  type="text" required placeholder="Contoh: Novrika mawarni, S.Pd."
+                  value={teacherName} onChange={(e) => setTeacherName(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Jabatan Struktural</label>
+                <input 
+                  type="text" required placeholder="Contoh: Waka Kurikulum / Guru Bidang Studi"
+                  value={teacherRole} onChange={(e) => setTeacherRole(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-semibold text-emerald-800"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Mata Pelajaran / Bidang Tugas</label>
+                <input 
+                  type="text" required placeholder="Contoh: Biologi, Kimia, Mentoring Qur'anic Leader"
+                  value={teacherMapel} onChange={(e) => setTeacherMapel(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Strata Pendidikan</label>
+                <select 
+                  value={teacherStrata} onChange={(e) => setTeacherStrata(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-mono font-bold"
+                >
+                  <option value="S1">S1 (Sarjana)</option>
+                  <option value="S2">S2 (Magister)</option>
+                  <option value="S3">S3 (Doktor)</option>
+                  <option value="D3">D3 (Diploma)</option>
+                </select>
+              </div>
+
+              <div className="pt-4 border-t flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddTeacherModal(false); setEditingTeacher(null); }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 font-bold"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold shadow"
+                >
+                  Simpan Data Pendidik
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Add / Edit Curriculum */}
+      {(isAddCurriculumModal || editingCurriculum) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+              {editingCurriculum ? 'Edit Program Kurikulum & Tahfidz' : 'Tambah Program Baru'}
+            </h3>
+
+            <form onSubmit={editingCurriculum ? handleEditCurriculumSubmit : handleAddCurriculum} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Nama Program / Matrikulasi</label>
+                <input 
+                  type="text" required placeholder="Contoh: Program Hafalan Tahfidz Al-Qur'an Intensif"
+                  value={currTitle} onChange={(e) => setCurrTitle(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Tipe Program</label>
+                <select 
+                  value={currType} onChange={(e) => setCurrType(e.target.value as any)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-semibold"
+                >
+                  <option value="Program Tahfidz">Program Tahfidz</option>
+                  <option value="Program Kurikulum">Program Kurikulum</option>
+                  <option value="Profil Lulusan">Profil Lulusan</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Target Output / Ketercapaian</label>
+                <input 
+                  type="text" required placeholder="Contoh: Target 5 - 10 Juz Mutqin / 90% Lolos PTN"
+                  value={currTarget} onChange={(e) => setCurrTarget(e.target.value)}
+                  className="w-full px-3 py-2 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500 font-semibold text-emerald-800"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Deskripsi Ringkas</label>
+                <textarea 
+                  rows={3} required placeholder="Tuliskan detail pelaksanaan program..."
+                  value={currDesc} onChange={(e) => setCurrDesc(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                ></textarea>
+              </div>
+
+              <div className="pt-4 border-t flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddCurriculumModal(false); setEditingCurriculum(null); }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 font-bold"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold shadow"
+                >
+                  Simpan Program
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Add / Edit Activity */}
+      {(isAddActivityModal || editingActivity) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+              {editingActivity ? 'Edit Aktivitas / Prestasi Siswa' : 'Tambah Aktivitas / Prestasi Baru'}
+            </h3>
+
+            <form onSubmit={editingActivity ? handleEditActivitySubmit : handleAddActivity} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Judul Aktivitas / Prestasi</label>
+                <input 
+                  type="text" required placeholder="Contoh: Juara 1 Medali Emas Olimpiade IT Nasional 2026"
+                  value={actTitle} onChange={(e) => setActTitle(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-bold"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Tipe Konten</label>
+                  <select 
+                    value={actType} onChange={(e) => setActType(e.target.value as any)}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                  >
+                    <option value="Prestasi">Prestasi Siswa</option>
+                    <option value="Aktivitas Kesiswaan">Aktivitas Kesiswaan</option>
+                    <option value="Ekstrakurikuler">Ekstrakurikuler</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Kategori / Tingkat</label>
+                  <input 
+                    type="text" required placeholder="Contoh: Tingkat Nasional / Provinsi"
+                    value={actCategory} onChange={(e) => setActCategory(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Badge Penghargaan</label>
+                  <input 
+                    type="text" required placeholder="Contoh: Juara 1 Emas"
+                    value={actBadge} onChange={(e) => setActBadge(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500 font-semibold text-emerald-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Nama Siswa / Tim</label>
+                  <input 
+                    type="text" required placeholder="Contoh: Tim Robotik & IT"
+                    value={actStudentName} onChange={(e) => setActStudentName(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Tahun / Tanggal</label>
+                  <input 
+                    type="text" required placeholder="Contoh: 2026 / April 2026"
+                    value={actDate} onChange={(e) => setActDate(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">URL Foto Aktivitas / Prestasi</label>
+                <input 
+                  type="url" required placeholder="https://images.unsplash.com/..."
+                  value={actImage} onChange={(e) => setActImage(e.target.value)}
+                  className="w-full px-3 py-2 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500 font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Deskripsi Aktivitas / Prestasi</label>
+                <textarea 
+                  rows={3} required placeholder="Tuliskan cerita singkat pencapaian dan proses kegiatan..."
+                  value={actDesc} onChange={(e) => setActDesc(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-xl outline-none focus:border-emerald-500"
+                ></textarea>
+              </div>
+
+              <div className="pt-4 border-t flex justify-end gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddActivityModal(false); setEditingActivity(null); }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 font-bold"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold shadow"
+                >
+                  Simpan Konten
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -1336,7 +2127,7 @@ export default function AdminContent() {
               </div>
 
               <div className="pt-4 border-t flex justify-end gap-2">
-                <button type="button" onClick={() => setIsAddEventModal(false)} className="px-4 py-2 rounded-xl bg-slate-100 font-bold">Batal</button>
+                <button type="button" onClick={() => setIsAddCurriculumModal(false)} className="px-4 py-2 rounded-xl bg-slate-100 font-bold">Batal</button>
                 <button type="submit" className="px-5 py-2 rounded-xl bg-emerald-600 text-white font-bold shadow">Simpan Agenda</button>
               </div>
             </form>
