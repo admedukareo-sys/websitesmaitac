@@ -47,27 +47,29 @@ switch ($action) {
         $s = $input;
         $stmt = $pdo->prepare("UPDATE `site_settings` SET 
             `school_name` = ?, `tagline` = ?, `visi` = ?, `address` = ?, `phone` = ?, 
-            `email` = ?, `website` = ?, `video_url` = ?, `facebook_url` = ?, 
+            `email` = ?, `website` = ?, `npsn` = ?, `accreditation` = ?, `video_url` = ?, `facebook_url` = ?, 
             `instagram_url` = ?, `youtube_url` = ?, `principal_name` = ?, 
             `principal_title` = ?, `principal_message` = ?, `principal_photo_url` = ?, 
             `history_text` = ? WHERE `id` = 1");
         $stmt->execute([
-            $s['schoolName'] ?? 'SMA IT Andalas Cendekia',
+            $s['schoolName'] ?? $s['school_name'] ?? 'SMA IT Andalas Cendekia',
             $s['tagline'] ?? '',
             $s['visi'] ?? '',
             $s['address'] ?? '',
             $s['phone'] ?? '',
             $s['email'] ?? '',
             $s['website'] ?? '',
-            $s['videoUrl'] ?? '',
-            $s['facebookUrl'] ?? '',
-            $s['instagramUrl'] ?? '',
-            $s['youtubeUrl'] ?? '',
-            $s['principalName'] ?? '',
-            $s['principalTitle'] ?? '',
-            $s['principalMessage'] ?? '',
-            $s['principalPhotoUrl'] ?? '',
-            $s['historyText'] ?? '',
+            $s['npsn'] ?? '20104766',
+            $s['accreditation'] ?? 'Akreditasi A',
+            $s['videoUrl'] ?? $s['video_url'] ?? '',
+            $s['facebookUrl'] ?? $s['facebook_url'] ?? '',
+            $s['instagramUrl'] ?? $s['instagram_url'] ?? '',
+            $s['youtubeUrl'] ?? $s['youtube_url'] ?? '',
+            $s['principalName'] ?? $s['principal_name'] ?? '',
+            $s['principalTitle'] ?? $s['principal_title'] ?? '',
+            $s['principalMessage'] ?? $s['principal_message'] ?? '',
+            $s['principalPhotoUrl'] ?? $s['principal_photo_url'] ?? '',
+            $s['historyText'] ?? $s['history_text'] ?? '',
         ]);
         echo json_encode(["status" => "success", "message" => "Pengaturan berhasil disimpan ke MySQL"]);
         break;

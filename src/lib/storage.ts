@@ -374,7 +374,7 @@ export function saveRegistrations(regs: Registration[]) {
 
 export function getRegistrationByUserId(userId: number): Registration | null {
   const regs = getRegistrations();
-  return regs.find((r) => r.userId === userId) || null;
+  return regs.find((r) => Number(r.userId) === Number(userId)) || null;
 }
 
 export function getCurrentUser(): User | null {
@@ -393,7 +393,7 @@ export function setCurrentUser(user: User | null) {
 
 export function updateRegistration(userId: number, updates: Partial<Registration>): Registration {
   const regs = getRegistrations();
-  let index = regs.findIndex((r) => r.userId === userId);
+  let index = regs.findIndex((r) => Number(r.userId) === Number(userId));
   let updatedReg: Registration;
   
   if (index === -1) {
@@ -422,7 +422,7 @@ export function updateRegistration(userId: number, updates: Partial<Registration
 
 export function updateRegistrationById(id: number, updates: Partial<Registration>): Registration | null {
   const regs = getRegistrations();
-  const index = regs.findIndex((r) => r.id === id);
+  const index = regs.findIndex((r) => Number(r.id) === Number(id));
   if (index !== -1) {
     regs[index] = {
       ...regs[index],
@@ -430,6 +430,7 @@ export function updateRegistrationById(id: number, updates: Partial<Registration
       updatedAt: new Date().toISOString(),
     };
     saveRegistrations(regs);
+    api.saveRegistration(regs[index]);
     return regs[index];
   }
   return null;
@@ -437,8 +438,9 @@ export function updateRegistrationById(id: number, updates: Partial<Registration
 
 export function deleteRegistrationById(id: number) {
   const regs = getRegistrations();
-  const filtered = regs.filter((r) => r.id !== id);
+  const filtered = regs.filter((r) => Number(r.id) !== Number(id));
   saveRegistrations(filtered);
+  api.deleteRegistration?.(id);
 }
 
 export function addRegistrationByAdmin(data: {
@@ -463,6 +465,7 @@ export function addRegistrationByAdmin(data: {
     };
     users.push(existingUser);
     saveUsers(users);
+    api.saveUser(existingUser);
   }
 
   const regs = getRegistrations();
@@ -479,6 +482,7 @@ export function addRegistrationByAdmin(data: {
 
   regs.push(newReg);
   saveRegistrations(regs);
+  api.saveRegistration(newReg);
   return newReg;
 }
 
@@ -532,6 +536,7 @@ export function getSiteNews(): NewsItem[] {
 
 export function saveSiteNews(news: NewsItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_NEWS, JSON.stringify(news));
+  api.saveNews?.(news);
 }
 
 export function getSiteEvents(): EventItem[] {
@@ -547,6 +552,7 @@ export function getSiteEvents(): EventItem[] {
 
 export function saveSiteEvents(events: EventItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(events));
+  api.saveEvents?.(events);
 }
 
 export function getSiteSlides(): SlideItem[] {
@@ -562,6 +568,7 @@ export function getSiteSlides(): SlideItem[] {
 
 export function saveSiteSlides(slides: SlideItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(slides));
+  api.saveSlides?.(slides);
 }
 
 export function getSiteFacilities(): FacilityItem[] {
@@ -577,6 +584,7 @@ export function getSiteFacilities(): FacilityItem[] {
 
 export function saveSiteFacilities(facilities: FacilityItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_FACILITIES, JSON.stringify(facilities));
+  api.saveFacilities?.(facilities);
 }
 
 export function getSiteTestimonials(): TestimonialItem[] {
@@ -592,6 +600,7 @@ export function getSiteTestimonials(): TestimonialItem[] {
 
 export function saveSiteTestimonials(testimonials: TestimonialItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(testimonials));
+  api.saveTestimonials?.(testimonials);
 }
 
 export function getSiteActivities(): ActivityAchievementItem[] {
@@ -607,6 +616,7 @@ export function getSiteActivities(): ActivityAchievementItem[] {
 
 export function saveSiteActivities(activities: ActivityAchievementItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_ACTIVITIES, JSON.stringify(activities));
+  api.saveActivities?.(activities);
 }
 
 export function getSiteCurriculum(): CurriculumTahfidzItem[] {
@@ -622,6 +632,7 @@ export function getSiteCurriculum(): CurriculumTahfidzItem[] {
 
 export function saveSiteCurriculum(curriculum: CurriculumTahfidzItem[]) {
   localStorage.setItem(STORAGE_KEYS.SITE_CURRICULUM, JSON.stringify(curriculum));
+  api.saveCurriculum?.(curriculum);
 }
 
 export function getSiteTeachers(): TeacherItem[] {
@@ -692,6 +703,146 @@ export async function syncWithBackend() {
         photoUrl: t.photoUrl || t.photo_url || '',
       }));
       localStorage.setItem(STORAGE_KEYS.SITE_TEACHERS, JSON.stringify(normalizedTeachers));
+      updated = true;
+    }
+
+    // 3. Sync News
+    const news = await api.getNews();
+    if (news && Array.isArray(news) && news.length > 0) {
+      const normalizedNews = news.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        category: item.category,
+        date: item.date,
+        author: item.author || 'Admin',
+        commentsCount: item.commentsCount || item.comments_count || 0,
+        imageUrl: item.imageUrl || item.image_url,
+        excerpt: item.excerpt,
+        content: item.content,
+      }));
+      localStorage.setItem(STORAGE_KEYS.SITE_NEWS, JSON.stringify(normalizedNews));
+      updated = true;
+    }
+
+    // 4. Sync Events
+    const events = await api.getEvents();
+    if (events && Array.isArray(events) && events.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(events));
+      updated = true;
+    }
+
+    // 5. Sync Slides
+    const slides = await api.getSlides();
+    if (slides && Array.isArray(slides) && slides.length > 0) {
+      const normalizedSlides = slides.map((s: any) => ({
+        id: s.id,
+        badge: s.badge,
+        title: s.title,
+        description: s.description,
+        imageUrl: s.imageUrl || s.image_url,
+        primaryCtaText: s.primaryCtaText || s.primary_cta_text,
+        primaryCtaLink: s.primaryCtaLink || s.primary_cta_link,
+        secondaryCtaText: s.secondaryCtaText || s.secondary_cta_text,
+        secondaryCtaLink: s.secondaryCtaLink || s.secondary_cta_link,
+      }));
+      localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(normalizedSlides));
+      updated = true;
+    }
+
+    // 6. Sync Facilities
+    const facilities = await api.getFacilities();
+    if (facilities && Array.isArray(facilities) && facilities.length > 0) {
+      const normalizedFacilities = facilities.map((f: any) => ({
+        id: f.id,
+        title: f.title,
+        category: f.category,
+        description: f.description,
+        imageUrl: f.imageUrl || f.image_url,
+      }));
+      localStorage.setItem(STORAGE_KEYS.SITE_FACILITIES, JSON.stringify(normalizedFacilities));
+      updated = true;
+    }
+
+    // 7. Sync Testimonials
+    const testimonials = await api.getTestimonials();
+    if (testimonials && Array.isArray(testimonials) && testimonials.length > 0) {
+      const normalizedTestimonials = testimonials.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        role: t.role,
+        rating: t.rating || 5,
+        quote: t.quote,
+        avatarUrl: t.avatarUrl || t.avatar_url,
+        timeAgo: t.timeAgo || t.time_ago,
+      }));
+      localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(normalizedTestimonials));
+      updated = true;
+    }
+
+    // 8. Sync Activities
+    const activities = await api.getActivities();
+    if (activities && Array.isArray(activities) && activities.length > 0) {
+      const normalizedActivities = activities.map((a: any) => ({
+        id: a.id,
+        title: a.title,
+        type: a.type,
+        category: a.category,
+        date: a.date,
+        studentName: a.studentName || a.student_name,
+        achievementBadge: a.achievementBadge || a.achievement_badge,
+        description: a.description,
+        imageUrl: a.imageUrl || a.image_url,
+      }));
+      localStorage.setItem(STORAGE_KEYS.SITE_ACTIVITIES, JSON.stringify(normalizedActivities));
+      updated = true;
+    }
+
+    // 9. Sync Curriculum
+    const curriculum = await api.getCurriculum();
+    if (curriculum && Array.isArray(curriculum) && curriculum.length > 0) {
+      const normalizedCurriculum = curriculum.map((c: any) => ({
+        id: c.id,
+        title: c.title,
+        type: c.type,
+        target: c.target,
+        description: c.description,
+        badgeColor: c.badgeColor || c.badge_color,
+      }));
+      localStorage.setItem(STORAGE_KEYS.SITE_CURRICULUM, JSON.stringify(normalizedCurriculum));
+      updated = true;
+    }
+
+    // 10. Sync Registrations
+    const registrations = await api.getRegistrations();
+    if (registrations && Array.isArray(registrations) && registrations.length > 0) {
+      const normalizedRegs = registrations.map((r: any) => ({
+        id: r.id,
+        userId: r.user_id || r.userId,
+        nisn: r.nisn,
+        nik: r.nik,
+        birthPlace: r.birth_place || r.birthPlace,
+        birthDate: r.birth_date || r.birthDate,
+        gender: r.gender,
+        address: r.address,
+        fatherName: r.father_name || r.fatherName,
+        motherName: r.mother_name || r.motherName,
+        parentPhone: r.parent_phone || r.parentPhone,
+        previousSchool: r.previous_school || r.previousSchool,
+        status: r.status,
+        rejectionReason: r.rejection_reason || r.rejectionReason,
+        paymentProofUrl: r.payment_proof_url || r.paymentProofUrl,
+        paymentStatus: r.payment_status || r.paymentStatus,
+        createdAt: r.created_at || r.createdAt,
+        updatedAt: r.updated_at || r.updatedAt,
+      }));
+      localStorage.setItem(STORAGE_KEYS.REGISTRATIONS, JSON.stringify(normalizedRegs));
+      updated = true;
+    }
+
+    // 11. Sync Users
+    const users = await api.getUsers();
+    if (users && Array.isArray(users) && users.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
       updated = true;
     }
 

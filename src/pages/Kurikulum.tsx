@@ -5,8 +5,16 @@ import { getSiteCurriculum, CurriculumTahfidzItem } from '@/lib/storage';
 export default function Kurikulum() {
   const [curriculumData, setCurriculumData] = useState<CurriculumTahfidzItem[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     setCurriculumData(getSiteCurriculum());
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   const profilLulusan = curriculumData.filter(item => item.type === 'Profil Lulusan');

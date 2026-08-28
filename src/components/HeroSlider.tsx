@@ -8,8 +8,16 @@ export default function HeroSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => {
+  const loadData = () => {
     setSlides(getSiteSlides());
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   useEffect(() => {

@@ -5,8 +5,16 @@ import { getRegistrations, Registration } from '@/lib/storage';
 export default function AdminDashboard() {
   const [regs, setRegs] = useState<Registration[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     setRegs(getRegistrations());
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   const totalRegs = regs.length;

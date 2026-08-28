@@ -156,6 +156,10 @@ export default function AdminContent() {
 
   useEffect(() => {
     loadAll();
+    window.addEventListener('smait_data_synced', loadAll);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadAll);
+    };
   }, []);
 
   const triggerNotice = (msg: string) => {

@@ -5,8 +5,16 @@ import { getSiteTestimonials, TestimonialItem } from '@/lib/storage';
 export default function Testimonials() {
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     setTestimonials(getSiteTestimonials());
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   return (

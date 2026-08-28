@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, getCurrentUser, setCurrentUser, getUsers, saveUsers, updateRegistration, Registration } from '@/lib/storage';
+import { api } from '@/lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -21,6 +22,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, pass: string): Promise<User> => {
+    // 1. Try Supabase remote login
+    const remoteUser = await api.login(email, pass);
+    if (remoteUser && remoteUser.id) {
+      const sessionUser: User = { id: remoteUser.id, name: remoteUser.name, email: remoteUser.email, role: remoteUser.role };
+      setUserState(sessionUser);
+      setCurrentUser(sessionUser);
+      return sessionUser;
+    }
+
+    // 2. Local fallback login
     const users = getUsers();
     const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
     
@@ -50,6 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: pass,
       role: 'STUDENT',
     };
+
+    // Save to remote Supabase DB
+    const savedRemote = await api.saveUser(newUser);
+    if (savedRemote && savedRemote.id) {
+      newUser.id = savedRemote.id;
+    }
 
     users.push(newUser);
     saveUsers(users);

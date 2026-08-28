@@ -15,7 +15,7 @@ export default function AdminPayments() {
     const filtered = regs
       .filter((r) => ['PENDING', 'VERIFIED'].includes(r.paymentStatus))
       .map((r) => {
-        const u = users.find((usr) => usr.id === r.userId);
+        const u = users.find((usr) => Number(usr.id) === Number(r.userId));
         return {
           ...r,
           userName: u ? u.name : 'Unknown',
@@ -27,6 +27,10 @@ export default function AdminPayments() {
 
   useEffect(() => {
     loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   const handleVerify = (id: number) => {

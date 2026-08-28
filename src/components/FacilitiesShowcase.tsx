@@ -7,8 +7,16 @@ export default function FacilitiesShowcase() {
   const [activeTab, setActiveTab] = useState<string>('Semua');
   const [selectedFacility, setSelectedFacility] = useState<FacilityItem | null>(null);
 
-  useEffect(() => {
+  const loadData = () => {
     setFacilitiesData(getSiteFacilities());
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   const categories = ['Semua', 'Akademik', 'Keagamaan', 'Teknologi', 'Olahraga & Terbuka'];

@@ -7,8 +7,16 @@ export default function Kesiswaan() {
   const [activeTab, setActiveTab] = useState<string>('Semua');
   const [selectedItem, setSelectedItem] = useState<ActivityAchievementItem | null>(null);
 
-  useEffect(() => {
+  const loadData = () => {
     setActivities(getSiteActivities());
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   const tabs = ['Semua', 'Prestasi', 'Aktivitas Kesiswaan', 'Ekstrakurikuler'];

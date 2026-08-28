@@ -7,8 +7,16 @@ export default function NewsGrid() {
   const [activeCategory, setActiveCategory] = useState<string>('Semua');
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
 
-  useEffect(() => {
+  const loadData = () => {
     setNewsData(getSiteNews());
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   const categories = ['Semua', 'Berita Terkini', 'Kegiatan Sekolah', 'Prestasi', 'Galeri'];

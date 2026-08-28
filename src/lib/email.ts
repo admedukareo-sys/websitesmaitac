@@ -32,7 +32,7 @@ export async function sendRegistrationEmail(payload: EmailPayload): Promise<{ su
  */
 export function generateEmailHTMLTemplate(name: string, reg: Registration): string {
   return `
-    <div font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 12px;>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
       <div style="background-color: #064e3b; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
         <h2 style="margin: 0;">SMA IT ANDALAS CENDEKIA</h2>
         <p style="margin: 5px 0 0 0; font-size: 14px; color: #fde047;">Sekolah Generasi Pemimpin Qur’ani</p>

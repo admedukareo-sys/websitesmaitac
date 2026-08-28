@@ -53,6 +53,10 @@ export default function AdminRegistrations() {
 
   useEffect(() => {
     loadData();
+    window.addEventListener('smait_data_synced', loadData);
+    return () => {
+      window.removeEventListener('smait_data_synced', loadData);
+    };
   }, []);
 
   const handleUpdateStatus = (id: number, newStatusVal: Registration['status']) => {
