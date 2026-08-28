@@ -11,6 +11,9 @@ export default defineConfig({
     },
   },
   server: {
+    watch: {
+      ignored: ['**/dist/**', '**/*.zip', '**/.git/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
