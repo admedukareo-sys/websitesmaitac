@@ -11,6 +11,7 @@ import {
   getSiteTeachers, saveSiteTeachers, TeacherItem
 } from '@/lib/storage';
 import { Save, Plus, Edit2, Trash2, CheckCircle2, Newspaper, Calendar, Settings, Video, Sliders, Building2, MessageSquareQuote, Star, Share2, Award, BookOpen, User, Users } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from '@/components/SocialIcons';
 
 export default function AdminContent() {
   const [activeTab, setActiveTab] = useState<'SETTINGS' | 'TEACHERS' | 'CURRICULUM' | 'ACTIVITIES' | 'TESTIMONIALS' | 'FACILITIES' | 'SLIDES' | 'NEWS' | 'EVENTS'>('TEACHERS');
@@ -1059,7 +1060,9 @@ export default function AdminContent() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Facebook URL</label>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <FacebookIcon className="w-4 h-4 text-[#1877F2]" /> Facebook URL
+                  </label>
                   <input 
                     type="url" placeholder="https://facebook.com/smaitandalascendekia"
                     value={settings.facebookUrl || ''}
@@ -1069,7 +1072,9 @@ export default function AdminContent() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Instagram URL</label>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <InstagramIcon className="w-4 h-4 text-[#E4405F]" /> Instagram URL
+                  </label>
                   <input 
                     type="url" placeholder="https://instagram.com/smaitandalascendekia"
                     value={settings.instagramUrl || ''}
@@ -1079,7 +1084,9 @@ export default function AdminContent() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">YouTube URL Channel</label>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <YoutubeIcon className="w-4 h-4 text-[#FF0000]" /> YouTube URL Channel
+                  </label>
                   <input 
                     type="url" placeholder="https://youtube.com/@smaitandalascendekia"
                     value={settings.youtubeUrl || ''}

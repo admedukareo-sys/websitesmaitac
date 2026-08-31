@@ -188,6 +188,9 @@ export const api = {
         rejection_reason: regData.rejectionReason || regData.rejection_reason || '',
         payment_status: regData.paymentStatus || regData.payment_status || 'UNPAID',
         payment_proof_url: regData.paymentProofUrl || regData.payment_proof_url || '',
+        program_type: regData.programType || regData.program_type || 'BOARDING',
+        info_source: regData.infoSource || regData.info_source || '',
+        reason_to_join: regData.reasonToJoin || regData.reason_to_join || '',
         updated_at: new Date().toISOString(),
       };
 
@@ -483,5 +486,58 @@ export const api = {
       }
     } catch (e) {}
     return apiRequest('save_events', events);
+  },
+
+  getVisitorLogs: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('visitor_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(250);
+
+      if (!error && data && data.length > 0) {
+        return data.map((item: any) => ({
+          id: item.id ? String(item.id) : `vis_${Date.now()}`,
+          timestamp: item.created_at || new Date().toISOString(),
+          page: item.page || '/',
+          pageTitle: item.page_title || item.page,
+          ip: item.ip || '180.252.112.44',
+          city: item.city || 'Pulau Punjung',
+          region: item.region || 'Sumatera Barat',
+          country: item.country || 'Indonesia',
+          deviceType: item.device_type || 'Desktop',
+          browser: item.browser || 'Chrome',
+          os: item.os || 'Windows',
+          referrer: item.referrer || 'Langsung (Direct)',
+        }));
+      }
+    } catch (e) {
+      console.warn('[Supabase getVisitorLogs]', e);
+    }
+    return null;
+  },
+
+  saveVisitorLog: async (log: any) => {
+    try {
+      const row = {
+        ip: log.ip,
+        city: log.city,
+        region: log.region,
+        country: log.country,
+        page: log.page,
+        page_title: log.pageTitle,
+        device_type: log.deviceType,
+        browser: log.browser,
+        os: log.os,
+        referrer: log.referrer,
+        created_at: log.timestamp || new Date().toISOString(),
+      };
+      const { data, error } = await supabase.from('visitor_logs').insert(row).select().single();
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn('[Supabase saveVisitorLog]', e);
+    }
+    return apiRequest('save_visitor_log', log);
   },
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock, ShieldCheck } from 'lucide-react';
 import { getSiteSettings, SiteSettings } from '@/lib/storage';
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from './SocialIcons';
 
 export default function Footer() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -55,10 +56,34 @@ export default function Footer() {
 
             <div>
               <h4 className="font-semibold text-xs text-slate-300 uppercase tracking-wider mb-3">Media Sosial Official</h4>
-              <div className="flex space-x-2">
-                <a href={fb} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">FB</a>
-                <a href={ig} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">IG</a>
-                <a href={yt} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-emerald-900/80 hover:bg-amber-500 hover:text-amber-950 font-bold text-xs rounded-xl flex items-center justify-center transition-all duration-300 text-emerald-200">YT</a>
+              <div className="flex space-x-2.5">
+                <a
+                  href={fb}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-emerald-900/90 text-emerald-200 hover:bg-[#1877F2] hover:text-white rounded-xl flex items-center justify-center transition-all duration-300 border border-emerald-800/80 hover:scale-110 shadow-sm"
+                  title="Facebook Official"
+                >
+                  <FacebookIcon className="w-4 h-4" />
+                </a>
+                <a
+                  href={ig}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-emerald-900/90 text-emerald-200 hover:bg-gradient-to-tr hover:from-amber-500 hover:via-rose-500 hover:to-purple-600 hover:text-white rounded-xl flex items-center justify-center transition-all duration-300 border border-emerald-800/80 hover:scale-110 shadow-sm"
+                  title="Instagram Official"
+                >
+                  <InstagramIcon className="w-4 h-4" />
+                </a>
+                <a
+                  href={yt}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-emerald-900/90 text-emerald-200 hover:bg-[#FF0000] hover:text-white rounded-xl flex items-center justify-center transition-all duration-300 border border-emerald-800/80 hover:scale-110 shadow-sm"
+                  title="YouTube Official"
+                >
+                  <YoutubeIcon className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </div>
@@ -135,6 +160,40 @@ export default function Footer() {
                 <p className="text-emerald-300/80 pl-6">Jenjang: SMA • Status: Swasta</p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Embedded Google Maps Section */}
+        <div className="mb-12 bg-emerald-900/40 rounded-3xl p-4 sm:p-6 border border-emerald-800/80 backdrop-blur-sm shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-emerald-800/60">
+            <div className="flex items-center gap-2.5 text-white">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-400 flex items-center justify-center shrink-0">
+                <MapPin size={18} />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-white">Lokasi Peta Kampus SMA IT Andalas Cendekia</h4>
+                <p className="text-[11px] text-emerald-300">Jorong Ranah Lintas, Nagari Tebing Tinggi, Kec. Pulau Punjung, Kab. Dharmasraya</p>
+              </div>
+            </div>
+            <a 
+              href="https://maps.google.com/?q=SMAIT+ANDALAS+CENDEKIA" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold px-4 py-2 rounded-xl transition-all duration-300 shadow hover:scale-105 shrink-0"
+            >
+              Buka Petunjuk Arah
+            </a>
+          </div>
+          
+          <div className="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden shadow-inner border border-emerald-700/50">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31913.645859513013!2d101.55588805402009!3d-1.0040395851206898!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd3534b1ce033df%3A0xd89a575380fe4b24!2sSMAIT%20ANDALAS%20CENDEKIA!5e0!3m2!1sen!2sid!4v1787892073887!5m2!1sen!2sid"
+              className="w-full h-full border-0"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              title="Peta Lokasi SMA IT Andalas Cendekia"
+            ></iframe>
           </div>
         </div>
 

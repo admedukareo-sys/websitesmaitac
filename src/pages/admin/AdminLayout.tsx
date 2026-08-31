@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { LayoutDashboard, Users, CreditCard, LogOut, ArrowLeft, User, FileEdit } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, LogOut, ArrowLeft, User, FileEdit, Globe } from 'lucide-react';
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
@@ -88,6 +88,18 @@ export default function AdminLayout() {
             </Link>
 
             <Link 
+              to="/admin/visitors" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActive('/admin/visitors') 
+                  ? 'bg-amber-500 text-amber-950 font-bold shadow-md shadow-amber-500/20' 
+                  : 'hover:bg-emerald-900/80 text-emerald-200 hover:text-white'
+              }`}
+            >
+              <Globe size={18} />
+              <span>Analisis Kunjungan & Lokasi</span>
+            </Link>
+
+            <Link 
               to="/admin/content" 
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 isActive('/admin/content') 
@@ -129,7 +141,15 @@ export default function AdminLayout() {
             <span>Portal Admin</span>
             <span>/</span>
             <span className="font-bold text-slate-800">
-              {location.pathname === '/admin' ? 'Dashboard' : location.pathname.includes('registrations') ? 'Data Pendaftar' : location.pathname.includes('payments') ? 'Verifikasi Pembayaran' : 'Kelola Isi Website'}
+              {location.pathname === '/admin' 
+                ? 'Dashboard' 
+                : location.pathname.includes('registrations') 
+                ? 'Data Pendaftar' 
+                : location.pathname.includes('payments') 
+                ? 'Verifikasi Pembayaran' 
+                : location.pathname.includes('visitors')
+                ? 'Analisis Kunjungan & Lokasi'
+                : 'Kelola Isi Website'}
             </span>
           </div>
 

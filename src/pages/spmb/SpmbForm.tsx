@@ -133,6 +133,110 @@ export default function SpmbForm() {
               </div>
             </section>
 
+            {/* Program Layanan Sekolah */}
+            <section>
+              <h2 className="text-xl font-semibold text-slate-800 border-b pb-2 mb-4 flex items-center justify-between">
+                <span>Pilihan Program Layanan</span>
+                <span className="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold">Wajib Dipilih</span>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className={`relative p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                  (formData.programType || 'BOARDING') === 'BOARDING' 
+                    ? 'border-emerald-600 bg-emerald-50/60 shadow-sm' 
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}>
+                  <div className="flex items-start gap-3">
+                    <input 
+                      type="radio" 
+                      name="programType" 
+                      value="BOARDING" 
+                      checked={(formData.programType || 'BOARDING') === 'BOARDING'} 
+                      onChange={handleChange} 
+                      disabled={isReadOnly} 
+                      className="mt-1 text-emerald-600 focus:ring-emerald-500" 
+                    />
+                    <div>
+                      <span className="font-bold text-slate-900 text-sm block mb-0.5">Boarding School (Berasrama)</span>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Program tinggal di asrama dengan pendampingan 24 jam, halaqah Tahfidz Al-Qur'an harian, & pengasuhan adab islami.
+                      </p>
+                    </div>
+                  </div>
+                </label>
+
+                <label className={`relative p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                  formData.programType === 'REGULER' 
+                    ? 'border-emerald-600 bg-emerald-50/60 shadow-sm' 
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}>
+                  <div className="flex items-start gap-3">
+                    <input 
+                      type="radio" 
+                      name="programType" 
+                      value="REGULER" 
+                      checked={formData.programType === 'REGULER'} 
+                      onChange={handleChange} 
+                      disabled={isReadOnly} 
+                      className="mt-1 text-emerald-600 focus:ring-emerald-500" 
+                    />
+                    <div>
+                      <span className="font-bold text-slate-900 text-sm block mb-0.5">Program Reguler (Non-Asrama / Full Day)</span>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Program pembelajaran tatap muka harian (Senin - Jumat 07.30 - 15.30 WIB) pulang pergi tanpa berasrama.
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </section>
+
+            {/* Survei Informasi & Alasan Memilih Sekolah */}
+            <section className="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+              <h2 className="text-lg font-bold text-slate-800 border-b pb-2 flex items-center justify-between">
+                <span>Survei SPMB & Alasan Memilih Sekolah</span>
+                <span className="text-[11px] text-slate-500 font-normal italic">*Survei internal (Tidak tercetak di kartu bukti fisik)</span>
+              </h2>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Darimana Anda mengetahui informasi SPMB SMA IT Andalas Cendekia?
+                </label>
+                <select 
+                  name="infoSource" 
+                  value={formData.infoSource || ''} 
+                  onChange={handleChange} 
+                  disabled={isReadOnly} 
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl shadow-sm focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-slate-100 text-sm bg-white"
+                >
+                  <option value="">-- Pilih Sumber Informasi --</option>
+                  <option value="Instagram / Facebook Official">Instagram / Facebook Official</option>
+                  <option value="Spanduk / Baliho / Banner">Spanduk / Baliho / Banner Jalan</option>
+                  <option value="Brosur / Leaflet Informasi">Brosur / Leaflet Cetak</option>
+                  <option value="Rekomendasi Alumni / Teman / Kerabat">Rekomendasi Alumni / Teman / Kerabat</option>
+                  <option value="Sosialisasi Sekolah / Kunjungan Guru">Sosialisasi Sekolah / Kunjungan Guru SMP</option>
+                  <option value="Website Official Sekolah">Website Official Sekolah</option>
+                  <option value="Lain-lain">Lain-lain</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Apa alasan Anda memilih SMA IT Andalas Cendekia?
+                </label>
+                <textarea 
+                  name="reasonToJoin" 
+                  value={formData.reasonToJoin || ''} 
+                  onChange={handleChange} 
+                  disabled={isReadOnly} 
+                  required
+                  rows={3} 
+                  placeholder="Contoh: Karena memiliki program unggulan Tahfidz Al-Qur'an 5-10 Juz, fasilitas digital modern, serta pembentukan karakter kepemimpinan Islam..." 
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl shadow-sm focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-slate-100 text-sm bg-white"
+                ></textarea>
+              </div>
+            </section>
+
             {!isReadOnly && (
               <div className="pt-4 flex items-center justify-between">
                 <p className="text-xs text-slate-500 flex items-center gap-1">

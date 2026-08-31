@@ -62,6 +62,9 @@ CREATE TABLE IF NOT EXISTS `registrations` (
   `interview_notes` TEXT DEFAULT NULL,
   `re_registration_proof_url` VARCHAR(500) DEFAULT NULL,
   `uniform_size` VARCHAR(10) DEFAULT NULL,
+  `program_type` ENUM('BOARDING', 'REGULER') NOT NULL DEFAULT 'BOARDING',
+  `info_source` VARCHAR(255) DEFAULT NULL,
+  `reason_to_join` TEXT DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -70,9 +73,9 @@ CREATE TABLE IF NOT EXISTS `registrations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Data Seed: registrations
-INSERT INTO `registrations` (`id`, `user_id`, `nisn`, `nik`, `birth_place`, `birth_date`, `gender`, `address`, `father_name`, `mother_name`, `parent_phone`, `previous_school`, `status`, `payment_status`, `payment_proof_url`, `created_at`, `updated_at`) VALUES
-(1, 2, '0051234567', '1371012304050001', 'Pulau Punjung', '2008-05-14', 'L', 'Jorong Ranah Lintas, Dharmasraya', 'Budi Santoso', 'Siti Aminah', '081266778899', 'SMP Negeri 1 Pulau Punjung', 'SUBMITTED', 'PENDING', 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80', '2026-08-26 00:00:00', '2026-08-26 00:00:00'),
-(2, 3, '0059876543', '1371012304050002', 'Sungai Dareh', '2008-08-20', 'P', 'Nagari Tebing Tinggi, Dharmasraya', 'Rahman Hakim', 'Nurhaliza', '081399887766', 'MTsN 1 Dharmasraya', 'DRAFT', 'UNPAID', NULL, '2026-08-26 00:00:00', '2026-08-26 00:00:00');
+INSERT INTO `registrations` (`id`, `user_id`, `nisn`, `nik`, `birth_place`, `birth_date`, `gender`, `address`, `father_name`, `mother_name`, `parent_phone`, `previous_school`, `status`, `payment_status`, `payment_proof_url`, `program_type`, `info_source`, `reason_to_join`, `created_at`, `updated_at`) VALUES
+(1, 2, '0051234567', '1371012304050001', 'Pulau Punjung', '2008-05-14', 'L', 'Jorong Ranah Lintas, Dharmasraya', 'Budi Santoso', 'Siti Aminah', '081266778899', 'SMP Negeri 1 Pulau Punjung', 'SUBMITTED', 'PENDING', 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80', 'BOARDING', 'Instagram / Facebook Official', 'Ingin fokus mendalami program Tahfidz Al-Qur\'an 10 Juz serta pembentukan karakter kepemimpinan Islam.', '2026-08-26 00:00:00', '2026-08-26 00:00:00'),
+(2, 3, '0059876543', '1371012304050002', 'Sungai Dareh', '2008-08-20', 'P', 'Nagari Tebing Tinggi, Dharmasraya', 'Rahman Hakim', 'Nurhaliza', '081399887766', 'MTsN 1 Dharmasraya', 'DRAFT', 'UNPAID', NULL, 'REGULER', 'Brosur / Leaflet Informasi', 'Kualitas akademis lulusan yang terbukti banyak diterima di PTN favorit.', '2026-08-26 00:00:00', '2026-08-26 00:00:00');
 
 -- --------------------------------------------------------
 -- 3. TABEL: site_settings (Pengaturan Profil, Visi, Sambutan Kepsek & Media Sosial)

@@ -33,8 +33,30 @@ export interface Registration {
   interviewNotes?: string;
   reRegistrationProofUrl?: string;
   uniformSize?: string;
+  programType?: 'BOARDING' | 'REGULER';
+  infoSource?: string;
+  reasonToJoin?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export function formatDateTime(isoString?: string): string {
+  if (!isoString) return '-';
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return isoString;
+    const formatted = d.toLocaleString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    return `${formatted.replace('.', ':')} WIB`;
+  } catch (e) {
+    return isoString;
+  }
 }
 
 export interface SiteSettings {
@@ -197,6 +219,9 @@ function initializeStorage() {
         status: 'SUBMITTED',
         paymentStatus: 'PENDING',
         paymentProofUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80',
+        programType: 'BOARDING',
+        infoSource: 'Instagram / Facebook Official',
+        reasonToJoin: 'Ingin fokus mendalami program Tahfidz Al-Qur\'an 10 Juz serta pembentukan karakter kepemimpinan Islam.',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -448,6 +473,9 @@ export function addRegistrationByAdmin(data: {
   email: string;
   previousSchool?: string;
   nisn?: string;
+  programType?: 'BOARDING' | 'REGULER';
+  infoSource?: string;
+  reasonToJoin?: string;
   status: Registration['status'];
   paymentStatus: Registration['paymentStatus'];
 }) {
@@ -474,6 +502,9 @@ export function addRegistrationByAdmin(data: {
     userId,
     nisn: data.nisn || '',
     previousSchool: data.previousSchool || '',
+    programType: data.programType || 'BOARDING',
+    infoSource: data.infoSource || 'Instagram / Facebook Official',
+    reasonToJoin: data.reasonToJoin || '',
     status: data.status,
     paymentStatus: data.paymentStatus,
     createdAt: new Date().toISOString(),
@@ -486,6 +517,28 @@ export function addRegistrationByAdmin(data: {
   return newReg;
 }
 
+// Helper to strip unwanted API update tags from strings and objects
+export function stripSupabaseTag<T>(value: T): T {
+  if (typeof value === 'string') {
+    return value
+      .replace(/\s*\(\s*Updated via Supabase API.*?\)/gi, '')
+      .replace(/\s*\(\s*Updated via.*?\)/gi, '')
+      .replace(/\s*Updated via Supabase API.*/gi, '')
+      .trim() as unknown as T;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => stripSupabaseTag(item)) as unknown as T;
+  }
+  if (value !== null && typeof value === 'object') {
+    const cleaned: Record<string, any> = {};
+    for (const key of Object.keys(value)) {
+      cleaned[key] = stripSupabaseTag((value as Record<string, any>)[key]);
+    }
+    return cleaned as unknown as T;
+  }
+  return value;
+}
+
 // Site Content CMS Helpers
 export function getSiteSettings(): SiteSettings {
   initializeStorage();
@@ -496,7 +549,7 @@ export function getSiteSettings(): SiteSettings {
   } catch (e) {
     data = {};
   }
-  return {
+  return stripSupabaseTag({
     schoolName: data.schoolName || data.school_name || 'SMA IT Andalas Cendekia',
     tagline: data.tagline || 'Sekolah Generasi Pemimpin Qur’ani',
     visi: data.visi || 'Mewujudkan Siswa Generasi Pemimpin Qur’ani',
@@ -515,12 +568,13 @@ export function getSiteSettings(): SiteSettings {
     principalMessage: data.principalMessage || data.principal_message || "Assalamu'alaikum Warahmatullahi Wabarakatuh. Selamat datang di portal resmi SMA IT Andalas Cendekia. Kami berkomitmen menyelenggarakan pendidikan yang membekali pendidikan agama, adab dan akhlak mulia, kecakapan hidup kekinian, serta penguasaan sains dan teknologi untuk membentuk Generasi Pemimpin Qur'ani.",
     principalPhotoUrl: data.principalPhotoUrl || data.principal_photo_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
     historyText: data.historyText || data.history_text || 'SMA IT Andalas Cendekia didirikan pada tanggal 5 Mei 2024 di Kabupaten Dharmasraya, Sumatera Barat. Lembaga ini hadir sebagai komitmen nyata untuk mencetak generasi pemimpin Qur\'ani yang berakhlak mulia, cerdas akademis, berwawasan global, dan siap bersaing di perguruan tinggi terkemuka.',
-  };
+  });
 }
 
 export function saveSiteSettings(settings: SiteSettings) {
-  localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(settings));
-  api.saveSettings(settings);
+  const cleaned = stripSupabaseTag(settings);
+  localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(cleaned));
+  api.saveSettings(cleaned);
 }
 
 export function getSiteNews(): NewsItem[] {
@@ -528,7 +582,7 @@ export function getSiteNews(): NewsItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_NEWS);
     const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    return stripSupabaseTag(Array.isArray(data) ? data : []);
   } catch (e) {
     return [];
   }
@@ -544,15 +598,16 @@ export function getSiteEvents(): EventItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_EVENTS);
     const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    return stripSupabaseTag(Array.isArray(data) ? data : []);
   } catch (e) {
     return [];
   }
 }
 
 export function saveSiteEvents(events: EventItem[]) {
-  localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(events));
-  api.saveEvents?.(events);
+  const cleaned = stripSupabaseTag(events);
+  localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(cleaned));
+  api.saveEvents?.(cleaned);
 }
 
 export function getSiteSlides(): SlideItem[] {
@@ -560,15 +615,16 @@ export function getSiteSlides(): SlideItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_SLIDES);
     const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    return stripSupabaseTag(Array.isArray(data) ? data : []);
   } catch (e) {
     return [];
   }
 }
 
 export function saveSiteSlides(slides: SlideItem[]) {
-  localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(slides));
-  api.saveSlides?.(slides);
+  const cleaned = stripSupabaseTag(slides);
+  localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(cleaned));
+  api.saveSlides?.(cleaned);
 }
 
 export function getSiteFacilities(): FacilityItem[] {
@@ -576,15 +632,16 @@ export function getSiteFacilities(): FacilityItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_FACILITIES);
     const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    return stripSupabaseTag(Array.isArray(data) ? data : []);
   } catch (e) {
     return [];
   }
 }
 
 export function saveSiteFacilities(facilities: FacilityItem[]) {
-  localStorage.setItem(STORAGE_KEYS.SITE_FACILITIES, JSON.stringify(facilities));
-  api.saveFacilities?.(facilities);
+  const cleaned = stripSupabaseTag(facilities);
+  localStorage.setItem(STORAGE_KEYS.SITE_FACILITIES, JSON.stringify(cleaned));
+  api.saveFacilities?.(cleaned);
 }
 
 export function getSiteTestimonials(): TestimonialItem[] {
@@ -592,15 +649,16 @@ export function getSiteTestimonials(): TestimonialItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_TESTIMONIALS);
     const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    return stripSupabaseTag(Array.isArray(data) ? data : []);
   } catch (e) {
     return [];
   }
 }
 
 export function saveSiteTestimonials(testimonials: TestimonialItem[]) {
-  localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(testimonials));
-  api.saveTestimonials?.(testimonials);
+  const cleaned = stripSupabaseTag(testimonials);
+  localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(cleaned));
+  api.saveTestimonials?.(cleaned);
 }
 
 export function getSiteActivities(): ActivityAchievementItem[] {
@@ -608,15 +666,16 @@ export function getSiteActivities(): ActivityAchievementItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_ACTIVITIES);
     const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    return stripSupabaseTag(Array.isArray(data) ? data : []);
   } catch (e) {
     return [];
   }
 }
 
 export function saveSiteActivities(activities: ActivityAchievementItem[]) {
-  localStorage.setItem(STORAGE_KEYS.SITE_ACTIVITIES, JSON.stringify(activities));
-  api.saveActivities?.(activities);
+  const cleaned = stripSupabaseTag(activities);
+  localStorage.setItem(STORAGE_KEYS.SITE_ACTIVITIES, JSON.stringify(cleaned));
+  api.saveActivities?.(cleaned);
 }
 
 export function getSiteCurriculum(): CurriculumTahfidzItem[] {
@@ -624,15 +683,16 @@ export function getSiteCurriculum(): CurriculumTahfidzItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_CURRICULUM);
     const data = raw ? JSON.parse(raw) : [];
-    return Array.isArray(data) ? data : [];
+    return stripSupabaseTag(Array.isArray(data) ? data : []);
   } catch (e) {
     return [];
   }
 }
 
 export function saveSiteCurriculum(curriculum: CurriculumTahfidzItem[]) {
-  localStorage.setItem(STORAGE_KEYS.SITE_CURRICULUM, JSON.stringify(curriculum));
-  api.saveCurriculum?.(curriculum);
+  const cleaned = stripSupabaseTag(curriculum);
+  localStorage.setItem(STORAGE_KEYS.SITE_CURRICULUM, JSON.stringify(cleaned));
+  api.saveCurriculum?.(cleaned);
 }
 
 export function getSiteTeachers(): TeacherItem[] {
@@ -641,14 +701,14 @@ export function getSiteTeachers(): TeacherItem[] {
     const raw = localStorage.getItem(STORAGE_KEYS.SITE_TEACHERS);
     const data = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(data)) return [];
-    return data.map((t: any, idx: number) => ({
+    return stripSupabaseTag(data.map((t: any, idx: number) => ({
       id: t.id || idx + 1,
       name: t.name || '',
       role: t.role || '',
       mapel: t.mapel || '',
       strata: t.strata || 'S1',
       photoUrl: t.photoUrl || t.photo_url || '',
-    }));
+    })));
   } catch (e) {
     return [];
   }
@@ -667,7 +727,7 @@ export async function syncWithBackend() {
     const settings = await api.getSettings();
     if (settings && typeof settings === 'object' && Object.keys(settings).length > 0) {
       const current = getSiteSettings();
-      const normalizedSettings: SiteSettings = {
+      const normalizedSettings: SiteSettings = stripSupabaseTag({
         schoolName: settings.schoolName || settings.school_name || current.schoolName,
         tagline: settings.tagline || current.tagline,
         visi: settings.visi || current.visi,
@@ -686,7 +746,7 @@ export async function syncWithBackend() {
         principalMessage: settings.principalMessage || settings.principal_message || current.principalMessage,
         principalPhotoUrl: settings.principalPhotoUrl || settings.principal_photo_url || current.principalPhotoUrl,
         historyText: settings.historyText || settings.history_text || current.historyText,
-      };
+      });
       localStorage.setItem(STORAGE_KEYS.SITE_SETTINGS, JSON.stringify(normalizedSettings));
       updated = true;
     }
@@ -694,14 +754,14 @@ export async function syncWithBackend() {
     // 2. Sync Teachers
     const teachers = await api.getTeachers();
     if (teachers && Array.isArray(teachers) && teachers.length > 0) {
-      const normalizedTeachers = teachers.map((t: any, idx: number) => ({
+      const normalizedTeachers = stripSupabaseTag(teachers.map((t: any, idx: number) => ({
         id: t.id || idx + 1,
         name: t.name || '',
         role: t.role || '',
         mapel: t.mapel || '',
         strata: t.strata || 'S1',
         photoUrl: t.photoUrl || t.photo_url || '',
-      }));
+      })));
       localStorage.setItem(STORAGE_KEYS.SITE_TEACHERS, JSON.stringify(normalizedTeachers));
       updated = true;
     }
@@ -709,7 +769,7 @@ export async function syncWithBackend() {
     // 3. Sync News
     const news = await api.getNews();
     if (news && Array.isArray(news) && news.length > 0) {
-      const normalizedNews = news.map((item: any) => ({
+      const normalizedNews = stripSupabaseTag(news.map((item: any) => ({
         id: item.id,
         title: item.title,
         category: item.category,
@@ -719,7 +779,7 @@ export async function syncWithBackend() {
         imageUrl: item.imageUrl || item.image_url,
         excerpt: item.excerpt,
         content: item.content,
-      }));
+      })));
       localStorage.setItem(STORAGE_KEYS.SITE_NEWS, JSON.stringify(normalizedNews));
       updated = true;
     }
@@ -727,14 +787,14 @@ export async function syncWithBackend() {
     // 4. Sync Events
     const events = await api.getEvents();
     if (events && Array.isArray(events) && events.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(events));
+      localStorage.setItem(STORAGE_KEYS.SITE_EVENTS, JSON.stringify(stripSupabaseTag(events)));
       updated = true;
     }
 
     // 5. Sync Slides
     const slides = await api.getSlides();
     if (slides && Array.isArray(slides) && slides.length > 0) {
-      const normalizedSlides = slides.map((s: any) => ({
+      const normalizedSlides = stripSupabaseTag(slides.map((s: any) => ({
         id: s.id,
         badge: s.badge,
         title: s.title,
@@ -744,7 +804,7 @@ export async function syncWithBackend() {
         primaryCtaLink: s.primaryCtaLink || s.primary_cta_link,
         secondaryCtaText: s.secondaryCtaText || s.secondary_cta_text,
         secondaryCtaLink: s.secondaryCtaLink || s.secondary_cta_link,
-      }));
+      })));
       localStorage.setItem(STORAGE_KEYS.SITE_SLIDES, JSON.stringify(normalizedSlides));
       updated = true;
     }
@@ -752,13 +812,13 @@ export async function syncWithBackend() {
     // 6. Sync Facilities
     const facilities = await api.getFacilities();
     if (facilities && Array.isArray(facilities) && facilities.length > 0) {
-      const normalizedFacilities = facilities.map((f: any) => ({
+      const normalizedFacilities = stripSupabaseTag(facilities.map((f: any) => ({
         id: f.id,
         title: f.title,
         category: f.category,
         description: f.description,
         imageUrl: f.imageUrl || f.image_url,
-      }));
+      })));
       localStorage.setItem(STORAGE_KEYS.SITE_FACILITIES, JSON.stringify(normalizedFacilities));
       updated = true;
     }
@@ -766,7 +826,7 @@ export async function syncWithBackend() {
     // 7. Sync Testimonials
     const testimonials = await api.getTestimonials();
     if (testimonials && Array.isArray(testimonials) && testimonials.length > 0) {
-      const normalizedTestimonials = testimonials.map((t: any) => ({
+      const normalizedTestimonials = stripSupabaseTag(testimonials.map((t: any) => ({
         id: t.id,
         name: t.name,
         role: t.role,
@@ -774,7 +834,7 @@ export async function syncWithBackend() {
         quote: t.quote,
         avatarUrl: t.avatarUrl || t.avatar_url,
         timeAgo: t.timeAgo || t.time_ago,
-      }));
+      })));
       localStorage.setItem(STORAGE_KEYS.SITE_TESTIMONIALS, JSON.stringify(normalizedTestimonials));
       updated = true;
     }
@@ -782,7 +842,7 @@ export async function syncWithBackend() {
     // 8. Sync Activities
     const activities = await api.getActivities();
     if (activities && Array.isArray(activities) && activities.length > 0) {
-      const normalizedActivities = activities.map((a: any) => ({
+      const normalizedActivities = stripSupabaseTag(activities.map((a: any) => ({
         id: a.id,
         title: a.title,
         type: a.type,
@@ -792,7 +852,7 @@ export async function syncWithBackend() {
         achievementBadge: a.achievementBadge || a.achievement_badge,
         description: a.description,
         imageUrl: a.imageUrl || a.image_url,
-      }));
+      })));
       localStorage.setItem(STORAGE_KEYS.SITE_ACTIVITIES, JSON.stringify(normalizedActivities));
       updated = true;
     }
@@ -800,14 +860,14 @@ export async function syncWithBackend() {
     // 9. Sync Curriculum
     const curriculum = await api.getCurriculum();
     if (curriculum && Array.isArray(curriculum) && curriculum.length > 0) {
-      const normalizedCurriculum = curriculum.map((c: any) => ({
+      const normalizedCurriculum = stripSupabaseTag(curriculum.map((c: any) => ({
         id: c.id,
         title: c.title,
         type: c.type,
         target: c.target,
         description: c.description,
         badgeColor: c.badgeColor || c.badge_color,
-      }));
+      })));
       localStorage.setItem(STORAGE_KEYS.SITE_CURRICULUM, JSON.stringify(normalizedCurriculum));
       updated = true;
     }
@@ -832,6 +892,9 @@ export async function syncWithBackend() {
         rejectionReason: r.rejection_reason || r.rejectionReason,
         paymentProofUrl: r.payment_proof_url || r.paymentProofUrl,
         paymentStatus: r.payment_status || r.paymentStatus,
+        programType: r.program_type || r.programType || 'BOARDING',
+        infoSource: r.info_source || r.infoSource || 'Instagram / Facebook Official',
+        reasonToJoin: r.reason_to_join || r.reasonToJoin || '',
         createdAt: r.created_at || r.createdAt,
         updatedAt: r.updated_at || r.updatedAt,
       }));

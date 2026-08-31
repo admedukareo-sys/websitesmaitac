@@ -93,22 +93,25 @@ switch ($action) {
             $stmt = $pdo->prepare("UPDATE `registrations` SET 
                 `nisn` = ?, `nik` = ?, `birth_place` = ?, `birth_date` = ?, `gender` = ?, 
                 `address` = ?, `father_name` = ?, `mother_name` = ?, `parent_phone` = ?, 
-                `previous_school` = ?, `status` = ?, `payment_status` = ?, `payment_proof_url` = ? 
+                `previous_school` = ?, `status` = ?, `payment_status` = ?, `payment_proof_url` = ?,
+                `program_type` = ?, `info_source` = ?, `reason_to_join` = ? 
                 WHERE `user_id` = ?");
             $stmt->execute([
                 $r['nisn'] ?? '', $r['nik'] ?? '', $r['birthPlace'] ?? '', $r['birthDate'] ?? null, $r['gender'] ?? 'L',
                 $r['address'] ?? '', $r['fatherName'] ?? '', $r['motherName'] ?? '', $r['parentPhone'] ?? '',
                 $r['previousSchool'] ?? '', $r['status'] ?? 'DRAFT', $r['paymentStatus'] ?? 'UNPAID', $r['paymentProofUrl'] ?? '',
+                $r['programType'] ?? 'BOARDING', $r['infoSource'] ?? '', $r['reasonToJoin'] ?? '',
                 $userId
             ]);
         } else {
             $stmt = $pdo->prepare("INSERT INTO `registrations` 
-                (`user_id`, `nisn`, `nik`, `birth_place`, `birth_date`, `gender`, `address`, `father_name`, `mother_name`, `parent_phone`, `previous_school`, `status`, `payment_status`, `payment_proof_url`, `created_at`) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                (`user_id`, `nisn`, `nik`, `birth_place`, `birth_date`, `gender`, `address`, `father_name`, `mother_name`, `parent_phone`, `previous_school`, `status`, `payment_status`, `payment_proof_url`, `program_type`, `info_source`, `reason_to_join`, `created_at`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
             $stmt->execute([
                 $userId, $r['nisn'] ?? '', $r['nik'] ?? '', $r['birthPlace'] ?? '', $r['birthDate'] ?? null, $r['gender'] ?? 'L',
                 $r['address'] ?? '', $r['fatherName'] ?? '', $r['motherName'] ?? '', $r['parentPhone'] ?? '',
-                $r['previousSchool'] ?? '', $r['status'] ?? 'DRAFT', $r['paymentStatus'] ?? 'UNPAID', $r['paymentProofUrl'] ?? ''
+                $r['previousSchool'] ?? '', $r['status'] ?? 'DRAFT', $r['paymentStatus'] ?? 'UNPAID', $r['paymentProofUrl'] ?? '',
+                $r['programType'] ?? 'BOARDING', $r['infoSource'] ?? '', $r['reasonToJoin'] ?? ''
             ]);
         }
         echo json_encode(["status" => "success", "message" => "Pendaftaran berhasil disimpan ke MySQL"]);

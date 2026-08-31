@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { getRegistrationByUserId, Registration, updateRegistration } from '@/lib/storage';
+import { getRegistrationByUserId, Registration, updateRegistration, formatDateTime } from '@/lib/storage';
 import RegistrationCardModal from '@/components/RegistrationCardModal';
-import { Mail, Printer, CheckCircle2 } from 'lucide-react';
+import { Mail, Printer, CheckCircle2, Calendar } from 'lucide-react';
 
 export default function SpmbDashboard() {
   const { user } = useAuth();
@@ -102,7 +102,14 @@ export default function SpmbDashboard() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-            <h2 className="text-xl font-bold text-slate-800 mb-4">Status Pendaftaran</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-slate-800">Status Pendaftaran</h2>
+              <div className="text-xs text-slate-500 font-medium flex items-center gap-1 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                <Calendar size={13} className="text-emerald-600 shrink-0" />
+                <span>Terdaftar: {formatDateTime(registration.createdAt)}</span>
+              </div>
+            </div>
+
             <div className={`inline-block px-4 py-2 rounded-full font-medium mb-4 text-xs ${statusColors[registration.status] || statusColors.DRAFT}`}>
               {statusLabel[registration.status] || registration.status}
             </div>

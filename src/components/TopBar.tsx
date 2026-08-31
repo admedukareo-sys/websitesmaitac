@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, Mail, Clock, ShieldCheck } from 'lucide-react';
 import { getSiteSettings, SiteSettings } from '@/lib/storage';
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from './SocialIcons';
 
 export default function TopBar() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -41,10 +42,34 @@ export default function TopBar() {
             <span>{settings?.tagline || 'Sekolah Generasi Pemimpin Qur’ani'}</span>
           </div>
           
-          <div className="flex items-center gap-3 text-emerald-300">
-            <a href={fb} target="_blank" rel="noopener noreferrer" className="hover:text-amber-400 transition-colors font-bold text-xs" title="Facebook">FB</a>
-            <a href={ig} target="_blank" rel="noopener noreferrer" className="hover:text-amber-400 transition-colors font-bold text-xs" title="Instagram">IG</a>
-            <a href={yt} target="_blank" rel="noopener noreferrer" className="hover:text-amber-400 transition-colors font-bold text-xs" title="YouTube">YT</a>
+          <div className="flex items-center gap-2 text-emerald-300">
+            <a
+              href={fb}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-7 h-7 rounded-lg bg-emerald-900/90 text-emerald-200 hover:bg-[#1877F2] hover:text-white flex items-center justify-center transition-all duration-300 border border-emerald-800/80 hover:scale-110 shadow-sm"
+              title="Facebook Official"
+            >
+              <FacebookIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={ig}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-7 h-7 rounded-lg bg-emerald-900/90 text-emerald-200 hover:bg-gradient-to-tr hover:from-amber-500 hover:via-rose-500 hover:to-purple-600 hover:text-white flex items-center justify-center transition-all duration-300 border border-emerald-800/80 hover:scale-110 shadow-sm"
+              title="Instagram Official"
+            >
+              <InstagramIcon className="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={yt}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-7 h-7 rounded-lg bg-emerald-900/90 text-emerald-200 hover:bg-[#FF0000] hover:text-white flex items-center justify-center transition-all duration-300 border border-emerald-800/80 hover:scale-110 shadow-sm"
+              title="YouTube Official"
+            >
+              <YoutubeIcon className="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
       </div>
